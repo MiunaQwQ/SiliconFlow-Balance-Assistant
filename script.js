@@ -325,7 +325,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let burnRateStatus = t('minimal');
         let burnRateColor = 'text-green';
         let etaText = t('safe');
-        let etaColor = 'text-green';
+        // No dynamic eta color - use default stat-value color
+        let etaColor = '';
 
         if (hoursDiff > 0) {
             const usedAmount = initialBalance - currentBalance;
@@ -341,18 +342,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 burnRateColor = 'text-orange';
             }
 
-            // ETA
+            // ETA Calculation
             if (hourlyBurn > 0) {
                 const hoursLeft = currentBalance / hourlyBurn;
-                if (hoursLeft < 24) {
-                    etaText = t('lessThan24h');
-                    etaColor = 'text-red';
-                } else if (hoursLeft < 72) {
-                    etaText = t('lessThan3d');
-                    etaColor = 'text-orange';
-                } else {
-                    const daysLeft = Math.floor(hoursLeft / 24);
-                    etaText = `~${daysLeft}${t('days')}`;
+                // If extremely long (> 90 days), keep 'Safe'
+                if (hoursLeft < 24 * 90) {
+                    const totalMinutes = Math.floor(hoursLeft * 60);
+                    const days = Math.floor(totalMinutes / (24 * 60));
+                    const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+                    const minutes = Math.floor(totalMinutes % 60);
+
+                    if (days > 0) {
+                        // e.g. ~3d5h
+                        etaText = `~${days}${t('days')}${hours}h`;
+                    } else if (hours > 0) {
+                        // e.g. ~2h4m
+                        etaText = `~${hours}h${minutes}m`;
+                    } else {
+                        // e.g. ~45m
+                        etaText = `~${minutes}m`;
+                    }
                 }
             }
         }
@@ -372,6 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (statsEta) {
             statsEta.textContent = etaText;
+            // Ensure no color classes are present, just stat-value
             statsEta.className = `stat-value ${etaColor}`;
         }
     }
