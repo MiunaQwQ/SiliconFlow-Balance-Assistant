@@ -200,12 +200,35 @@ document.addEventListener('DOMContentLoaded', () => {
         historyChart.classList.add('hidden');
     }
 
+    let currentHistoryData = null;
+
+    // Listen for language changes to update dynamic content
+    window.addEventListener('languageChanged', () => {
+        // Re-render chart if data exists
+        if (currentHistoryData && currentHistoryData.history) {
+            renderBalanceChart(currentHistoryData.history);
+        }
+        // Re-render stats card if data exists
+        if (currentHistoryData && currentApiKey) {
+            updateStatsCard(currentHistoryData, currentApiKey);
+        }
+        // Re-render user status in main card if visible
+        if (currentApiKey) {
+            const statusElement = document.getElementById('userStatus');
+            if (statusElement) {
+                const isBlocked = statusElement.classList.contains('status-error');
+                statusElement.textContent = isBlocked ? t('statusBlocked') : t('statusActive');
+            }
+        }
+    });
+
     async function loadBalanceHistory(apiKey, days = 7) {
         try {
             const response = await fetch(`${BACKEND_URL}/get_history.php?api_key=${encodeURIComponent(apiKey)}&days=${days}`);
             const result = await response.json();
 
             if (result.success && result.data.is_tracked && result.data.history.length > 0) {
+                currentHistoryData = result.data; // Store for re-rendering
                 renderBalanceChart(result.data.history);
                 updateStatsCard(result.data, apiKey);
                 historyChart.classList.remove('hidden');
@@ -213,10 +236,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(syncCardHeights, 100);
             } else {
                 historyChart.classList.add('hidden');
+                currentHistoryData = null;
             }
         } catch (error) {
             console.error('Failed to load balance history:', error);
             historyChart.classList.add('hidden');
+            currentHistoryData = null;
         }
     }
 
@@ -232,7 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const statsUsed = document.getElementById('statsUsed');
         const statsEta = document.getElementById('statsEta');
         // Find Burn Rate element - it has class 'text-green' and data-i18n="minimal" by default
-        // We need a more reliable way to select it if IDs are missing, but let's traverse
         const statItems = document.querySelectorAll('.stat-item');
         let statsBurnRateValue = null;
         if (statItems.length >= 2) {
@@ -241,7 +265,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. Model Name / User ID
         const currentUserName = document.getElementById('userName').textContent;
-        statsModelName.textContent = currentUserName !== 'User Name' ? currentUserName : 'Tracked Key';
+        // Check if generic or translated generic
+        const isGeneric = currentUserName === 'User Name' || currentUserName === t('userNamePersonal') || currentUserName === t('unknownUser');
+        statsModelName.textContent = !isGeneric ? currentUserName : t('trackedKey');
 
         // 2. Calculate Percentage
         const history = data.history;
@@ -286,7 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Linear Progress
         linearProgress.className = `progress-bar-fill ${bgClass}`;
         linearProgress.style.width = percentage + '%';
-        linearProgressLabel.textContent = `Remaining: ${Math.round(percentage)}%`;
+        // Translated "Remaining"
+        linearProgressLabel.textContent = `${t('remaining')}: ${Math.round(percentage)}%`;
 
         // 4. Grid Stats & Calculations
 
@@ -295,9 +322,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const endTime = new Date(latestRecord.checked_at).getTime();
         const hoursDiff = (endTime - startTime) / (1000 * 60 * 60);
 
-        let burnRateStatus = 'Minimal';
+        let burnRateStatus = t('minimal');
         let burnRateColor = 'text-green';
-        let etaText = 'Safe';
+        let etaText = t('safe');
         let etaColor = 'text-green';
 
         if (hoursDiff > 0) {
@@ -307,10 +334,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const hourlyPercentBurn = (hourlyBurn / initialBalance) * 100;
 
             if (hourlyPercentBurn > 2) {
-                burnRateStatus = 'Very Fast';
+                burnRateStatus = t('veryFast');
                 burnRateColor = 'text-red';
             } else if (hourlyPercentBurn > 0.5) {
-                burnRateStatus = 'Fast';
+                burnRateStatus = t('fast');
                 burnRateColor = 'text-orange';
             }
 
@@ -318,14 +345,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (hourlyBurn > 0) {
                 const hoursLeft = currentBalance / hourlyBurn;
                 if (hoursLeft < 24) {
-                    etaText = `< 24h`;
+                    etaText = t('lessThan24h');
                     etaColor = 'text-red';
                 } else if (hoursLeft < 72) {
-                    etaText = `< 3d`;
+                    etaText = t('lessThan3d');
                     etaColor = 'text-orange';
                 } else {
                     const daysLeft = Math.floor(hoursLeft / 24);
-                    etaText = `~${daysLeft}d`;
+                    etaText = `~${daysLeft}${t('days')}`;
                 }
             }
         }

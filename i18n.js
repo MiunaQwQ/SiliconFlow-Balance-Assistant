@@ -21,7 +21,23 @@ const translations = {
         'trackHint': 'Enable to periodically record balance changes',
         'balanceHistory': 'Balance History',
         'balance': 'Balance',
-        'trackingError': 'Failed to update tracking status'
+        'balance': 'Balance',
+        'trackingError': 'Failed to update tracking status',
+        'userStatusTitle': 'User Status',
+        'remaining': 'Remaining',
+        'used': 'Used',
+        'updateTime': 'Update Time',
+        'burnRate': 'Burn Rate',
+        'minimal': 'Minimal',
+        'fast': 'Fast',
+        'veryFast': 'Very Fast',
+        'etaEmpty': 'ETA Empty',
+        'safe': 'Safe',
+        'lessThan24h': '< 24h',
+        'lessThan3d': '< 3d',
+        'sessionUsed': 'Total Used',
+        'trackedKey': 'Tracked Key',
+        'days': 'd'
     },
     'zh-CN': {
         'title': 'SiliconFlow 余额助手',
@@ -45,7 +61,23 @@ const translations = {
         'trackHint': '启用后将定期记录余额变化',
         'balanceHistory': '余额历史',
         'balance': '余额',
-        'trackingError': '更新跟踪状态失败'
+        'balance': '余额',
+        'trackingError': '更新跟踪状态失败',
+        'userStatusTitle': '用户状态',
+        'remaining': '剩余',
+        'used': '已用',
+        'updateTime': '更新时间',
+        'burnRate': '消耗速率',
+        'minimal': '极低',
+        'fast': '快',
+        'veryFast': '极快',
+        'etaEmpty': '预计耗尽',
+        'safe': '安全',
+        'lessThan24h': '< 24小时',
+        'lessThan3d': '< 3天',
+        'sessionUsed': '累计消耗',
+        'trackedKey': '跟踪的 Key',
+        'days': '天'
     },
     'zh-TW': {
         'title': 'SiliconFlow 餘額助手',
@@ -69,7 +101,23 @@ const translations = {
         'trackHint': '啟用後將定期記錄餘額變化',
         'balanceHistory': '餘額歷史',
         'balance': '餘額',
-        'trackingError': '更新追蹤狀態失敗'
+        'balance': '餘額',
+        'trackingError': '更新追蹤狀態失敗',
+        'userStatusTitle': '用戶狀態',
+        'remaining': '剩餘',
+        'used': '已用',
+        'updateTime': '更新時間',
+        'burnRate': '消耗速率',
+        'minimal': '極低',
+        'fast': '快',
+        'veryFast': '極快',
+        'etaEmpty': '預計耗盡',
+        'safe': '安全',
+        'lessThan24h': '< 24小時',
+        'lessThan3d': '< 3天',
+        'sessionUsed': '累計消耗',
+        'trackedKey': '追蹤的 Key',
+        'days': '天'
     },
     'ja': {
         'title': 'SiliconFlow 残高アシスタント',
@@ -93,7 +141,23 @@ const translations = {
         'trackHint': '有効にすると残高の変化が定期的に記録されます',
         'balanceHistory': '残高履歴',
         'balance': '残高',
-        'trackingError': '追跡ステータスの更新に失敗しました'
+        'balance': '残高',
+        'trackingError': '追跡ステータスの更新に失敗しました',
+        'userStatusTitle': 'ステータス',
+        'remaining': '残り',
+        'used': '使用済み',
+        'updateTime': '更新時間',
+        'burnRate': '消費ペース',
+        'minimal': '極低',
+        'fast': '速い',
+        'veryFast': '極速',
+        'etaEmpty': '枯渇予想',
+        'safe': '安全',
+        'lessThan24h': '< 24時間',
+        'lessThan3d': '< 3日',
+        'sessionUsed': '累積消費',
+        'trackedKey': '追跡中キー',
+        'days': '日'
     }
 };
 
@@ -104,6 +168,8 @@ function setLanguage(lang) {
         currentLang = lang;
         localStorage.setItem('sf_lang', lang);
         applyTranslations();
+        // Dispatch event for other scripts to react
+        window.dispatchEvent(new Event('languageChanged'));
     }
 }
 
