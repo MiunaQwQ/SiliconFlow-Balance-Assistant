@@ -61,16 +61,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function displayResult(data) {
-        let displayName = data.name || t('unknownUser');
-        if (displayName === '个人') {
-            displayName = t('userNamePersonal');
+        // API might return 'name', 'username', or just 'email'
+        let displayName = data.name || data.username || data.nickname || '';
+
+        // Handle User Name
+        if (!displayName) {
+            userName.setAttribute('data-i18n', 'unknownUser');
+            userName.textContent = t('unknownUser');
+            displayName = 'U'; // For avatar
+        } else if (displayName === '个人') {
+            userName.setAttribute('data-i18n', 'userNamePersonal');
+            userName.textContent = t('userNamePersonal');
+        } else {
+            userName.removeAttribute('data-i18n');
+            userName.textContent = displayName;
         }
 
-        userName.textContent = displayName;
-        userEmail.textContent = data.email || t('noEmail');
+        // Handle Email
+        if (!data.email) {
+            userEmail.setAttribute('data-i18n', 'noEmail');
+            userEmail.textContent = t('noEmail');
+        } else {
+            userEmail.removeAttribute('data-i18n');
+            userEmail.textContent = data.email;
+        }
 
         // Avatar Initial
-        const nameInitial = (displayName === t('unknownUser') ? 'U' : displayName.charAt(0)).toUpperCase();
+        const nameInitial = (displayName === '个人' || displayName.length === 0) ? 'U' : (userName.textContent || 'U').charAt(0).toUpperCase();
         avatarName.textContent = nameInitial;
 
         // Balance
