@@ -20,9 +20,23 @@
 
     <div class="container">
         <div class="card">
+            <div class="lang-switch">
+                <select id="langSelect" onchange="setLanguage(this.value)">
+                    <option value="zh-CN">简体中文</option>
+                    <option value="zh-TW">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                </select>
+                <svg class="lang-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
+            </div>
+
             <header>
-                <h1>SiliconFlow Balance Assistant</h1>
-                <p class="subtitle">API Balance Checker</p>
+                <h1 data-i18n="title">SiliconFlow Balance Assistant</h1>
+                <p class="subtitle" data-i18n="subtitle">API Balance Checker</p>
             </header>
 
             <div class="input-group">
@@ -32,10 +46,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11.536 19.464a3 3 0 01-0.899 -2.121l-0.879 -0.879a3 3 0 01-2.121 0.899l-2.121 -2.121a3 3 0 010.899 -2.121l0.879 -0.879a3 3 0 01-2.121 0.899L4.536 12.257A6 6 0 1119 7z" />
                     </svg>
-                    <input type="password" id="apiKey" placeholder="Enter your API Key (sx-...)" autocomplete="off">
+                    <input type="password" id="apiKey" data-i18n="placeholder" placeholder="Enter your API Key (sk-...)"
+                        autocomplete="off">
                 </div>
                 <button id="checkBtn">
-                    <span class="btn-text">Check Balance</span>
+                    <span class="btn-text" data-i18n="checkBtn">Check Balance</span>
                     <span class="btn-loader"></span>
                 </button>
             </div>
@@ -51,18 +66,18 @@
 
                 <div class="balance-card">
                     <div class="balance-item">
-                        <span class="label">Total Balance</span>
+                        <span class="label" data-i18n="totalBalance">Total Balance</span>
                         <span class="value" id="totalBalance">¥0.00</span>
                     </div>
                     <div class="balance-divider"></div>
                     <div class="balance-item">
-                        <span class="label">Status</span>
-                        <span class="value status-active" id="userStatus">Active</span>
+                        <span class="label" data-i18n="status">Status</span>
+                        <span class="value status-active" id="userStatus" data-i18n="statusActive">Active</span>
                     </div>
                 </div>
 
                 <div class="info-row">
-                    <span class="label">User ID:</span>
+                    <span class="label" data-i18n="userId">User ID:</span>
                     <span class="value-text" id="userId">...</span>
                 </div>
             </div>
@@ -78,6 +93,7 @@
         </div>
     </div>
 
+    <script src="i18n.js"></script>
     <script src="script.js"></script>
 </body>
 

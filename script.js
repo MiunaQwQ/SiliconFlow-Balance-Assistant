@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Language
+    if (typeof initLanguage === 'function') {
+        initLanguage();
+    }
+
     const apiKeyInput = document.getElementById('apiKey');
     const checkBtn = document.getElementById('checkBtn');
     const resultContainer = document.getElementById('result');
@@ -17,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const apiKey = apiKeyInput.value.trim();
 
         if (!apiKey) {
-            showError('请输入您的 API Key');
+            showError(t('errorEmpty'));
             return;
         }
 
@@ -39,13 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) {
                 // Handle API specific errors
-                throw new Error(data.message || '获取用户信息失败');
+                throw new Error(data.message || t('errorGeneric'));
             }
 
             if (data.code === 20000 && data.data) {
                 displayResult(data.data);
             } else {
-                throw new Error(data.message || '未知的响应格式');
+                throw new Error(data.message || t('errorFormat'));
             }
 
         } catch (error) {
@@ -56,32 +61,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function displayResult(data) {
-        userName.textContent = data.name || '未知用户';
-        userEmail.textContent = data.email || '无邮箱';
+        userName.textContent = data.name || t('unknownUser');
+        userEmail.textContent = data.email || t('noEmail');
 
         // Avatar Initial
         const nameInitial = (data.name || 'U').charAt(0).toUpperCase();
         avatarName.textContent = nameInitial;
 
-        // Balance (Assuming 'totalBalance' or 'balance' in the response, adapting to typical SF format)
-        // Note: The actual API response field for balance might vary. 
-        // Based on common structures, it might be in `balance` or a separate wallet endpoint. 
-        // For /user/info, it usually returns basic info. 
-        // If balance is not in /user/info, we might need to check standard fields like `balance` or `quota`.
-        // Let's assume `balance` exists in the data object based on typical usage, 
-        // or we display what we have.
-        // User reports usually mention a specific balance field.
-        // If the balance is not directly in `user/info`, we might need a separate call.
-        // However, for this task, we display what is available. 
-        // If `balance` is strictly separate, we'll see 0 or undefined.
-        // Let's check for `balance` or `total_balance`.
-
+        // Balance
         const balanceVal = data.balance !== undefined ? data.balance : (data.totalBalance || '0.00');
         totalBalance.textContent = `¥${balanceVal}`;
 
         // Status
-        userStatus.textContent = data.status === 'blocked' ? '已封禁' : '正常';
+        const statusText = data.status === 'blocked' ? t('statusBlocked') : t('statusActive');
+        userStatus.textContent = statusText;
         userStatus.className = 'value ' + (data.status === 'blocked' ? 'status-error' : 'status-active');
+        // Add data-i18n for status if it matches standard keys, but since it's dynamic based on value, 
+        // we set textContent directly. We could use setAttribute('data-i18n', ...) if we wanted dynamic updates 
+        // when language changes while result is shown, but for now we'll just set text.
+        // To support dynamic language switch while result is open, we can store the status in a dataset or variable
+        // and re-render. Ideally `applyTranslations` could handle this if we set a specific attribute.
+        // For simplicity, we might just leave it as textContent. 
+        // Better yet: set data-i18n attribute dynamically so language switch effects it immediately.
+        if (data.status === 'blocked') {
+            userStatus.setAttribute('data-i18n', 'statusBlocked');
+        } else {
+            userStatus.setAttribute('data-i18n', 'statusActive');
+        }
 
         userId.textContent = data.id || 'N/A';
 
@@ -98,6 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setLoading(isLoading) {
+        // When finding checkBtn, we need to be careful if we replaced its content or text.
+        // The HTML structure is <button><span class="btn-text">Check Balance</span><span class="btn-loader"></span></button>
+        // We only change class on button.
         if (isLoading) {
             checkBtn.classList.add('loading');
             checkBtn.disabled = true;
