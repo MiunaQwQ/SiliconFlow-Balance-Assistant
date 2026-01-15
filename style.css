@@ -85,14 +85,17 @@ body {
 /* Main Layout */
 .main-layout {
     width: 100%;
-    max-width: 1000px;
+    /* max-width removed to allow full positioning context */
     padding: 20px;
     position: relative;
     z-index: 10;
+
+    /* Default: Stacked (Mobile/Tablet methodology) */
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     gap: 24px;
+
     transition: all 0.3s ease;
 }
 
@@ -101,6 +104,8 @@ body {
     width: 100%;
     max-width: 420px;
     flex-shrink: 0;
+    margin: 0 auto;
+    /* Center in standard flow */
 }
 
 .card {
@@ -492,13 +497,34 @@ button:disabled {
 
 /* Side Panel */
 .side-panel {
-    flex: 1;
-    min-width: 0;
-    /* Prevent flex overflow */
+    /* Default: Width constrained for stacking */
+    width: 100%;
     max-width: 580px;
+
     opacity: 1;
     transform: translateX(0);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Desktop Absolute Positioning (> 1100px) */
+@media (min-width: 1100px) {
+    .main-layout {
+        display: block;
+        /* Allow absolute child relative to this container */
+        min-height: 100vh;
+        /* Ensure container has height context if needed */
+    }
+
+    .side-panel {
+        position: absolute;
+        top: 20px;
+        /* Align with top padding */
+        left: 50%;
+        margin-left: 234px;
+        /* 420px/2 (210) + 24px gap */
+        width: 580px;
+        /* Fixed width on desktop */
+    }
 }
 
 .side-panel.hidden {
@@ -717,17 +743,12 @@ button:disabled {
     height: 100% !important;
 }
 
-/* Responsive adjustments */
-@media (max-width: 900px) {
-    .main-layout {
-        flex-direction: column;
-        align-items: center;
-        max-width: 460px;
-        /* Limit width when stacked */
-    }
+/* Responsive adjustments (Override desktop absolute if screen is narrow) */
+@media (max-width: 1099px) {
 
-    .side-panel {
-        width: 100%;
+    /* Already handled by default mobile-first styles up top, 
+       but standardizing the query here if needed for specific overrides */
+    .main-layout {
         max-width: 100%;
     }
 }
