@@ -750,6 +750,7 @@ button:disabled {
     padding: 24px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     height: 100%;
+    position: relative;
 }
 
 .chart-title {
@@ -770,6 +771,39 @@ button:disabled {
     margin-right: 12px;
     border-radius: 2px;
 }
+
+.refresh-countdown {
+    position: absolute;
+    top: 20px;
+    /* Aligned slightly higher to match header visual center */
+    right: 24px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    /* Switch to Sans for cleaner look, or keep mono if preferred for digits. Let's use tabular nums if possible */
+    font-variant-numeric: tabular-nums;
+    transition: all 0.3s ease;
+
+    /* New styling */
+    padding: 6px 12px;
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Optional: Add a small icon via CSS before? Or just keep text clean. Let's keep it text for now but maybe add a label or icon if requested later. */
+
+.refresh-countdown.warning {
+    color: var(--warning-color);
+    border-color: rgba(245, 158, 11, 0.3);
+    /* Warning color with opacity */
+    background: rgba(245, 158, 11, 0.1);
+}
+
 
 .canvas-container {
     position: relative;

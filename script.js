@@ -201,6 +201,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let currentHistoryData = null;
+    let lastUpdateTime = null;
+    let countdownInterval = null;
+    let refreshCountdownElement = null;
+
+    // Initialize countdown element reference after DOM is ready
+    function initCountdownElement() {
+        if (!refreshCountdownElement) {
+            refreshCountdownElement = document.getElementById('refreshTimer');
+        }
+    }
 
     // Listen for language changes to update dynamic content
     window.addEventListener('languageChanged', () => {
@@ -222,6 +232,82 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    async function refreshAllData() {
+        if (!currentApiKey) return;
+
+        try {
+            // Fetch fresh user info from SiliconFlow API
+            const response = await fetch('https://api.siliconflow.cn/v1/user/info', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${currentApiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.code === 20000 && data.data) {
+                // Update main card
+                displayResult(data.data);
+                // Refresh tracking status and chart
+                await checkTrackingStatus(currentApiKey, data.data);
+            }
+        } catch (error) {
+            console.error('Auto-refresh failed:', error);
+        }
+    }
+
+    function updateCountdown() {
+        initCountdownElement();
+        if (!lastUpdateTime || !refreshCountdownElement) return;
+
+        const now = Date.now();
+        const elapsed = now - lastUpdateTime;
+        const refreshInterval = 5 * 60 * 1000; // 5 minutes in ms
+        const remaining = refreshInterval - elapsed;
+
+        if (remaining <= 0) {
+            // Time to refresh - refresh entire page data
+            refreshAllData();
+            return;
+        }
+
+        // Calculate minutes and seconds
+        const totalSeconds = Math.floor(remaining / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+
+        // Update display
+        refreshCountdownElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        // Add warning class if less than 1 minute
+        if (totalSeconds < 60) {
+            refreshCountdownElement.parentElement.classList.add('warning');
+        } else {
+            refreshCountdownElement.parentElement.classList.remove('warning');
+        }
+    }
+
+    function startCountdown() {
+        initCountdownElement();
+        // Clear any existing interval
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+        // Update immediately
+        updateCountdown();
+        // Then update every second
+        countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    function stopCountdown() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+    }
+
     async function loadBalanceHistory(apiKey, days = 7) {
         try {
             const response = await fetch(`${BACKEND_URL}/get_history.php?api_key=${encodeURIComponent(apiKey)}&days=${days}`);
@@ -232,16 +318,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderBalanceChart(result.data.history);
                 updateStatsCard(result.data, apiKey);
                 historyChart.classList.remove('hidden');
+                // Update last update time and start countdown
+                lastUpdateTime = Date.now();
+                startCountdown();
                 // Sync heights after render
                 setTimeout(syncCardHeights, 100);
             } else {
                 historyChart.classList.add('hidden');
                 currentHistoryData = null;
+                stopCountdown();
             }
         } catch (error) {
             console.error('Failed to load balance history:', error);
             historyChart.classList.add('hidden');
             currentHistoryData = null;
+            stopCountdown();
         }
     }
 
@@ -354,13 +445,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (days > 0) {
                         // e.g. ~3d5h
-                        etaText = `~${days}${t('days')}${hours}h`;
+                        etaText = `~${days}${t('days')}${hours}${t('hours')}`;
                     } else if (hours > 0) {
                         // e.g. ~2h4m
-                        etaText = `~${hours}h${minutes}m`;
+                        etaText = `~${hours}${t('hours')}${minutes}${t('minutes')}`;
                     } else {
                         // e.g. ~45m
-                        etaText = `~${minutes}m`;
+                        etaText = `~${minutes}${t('minutes')}`;
                     }
                 }
             }

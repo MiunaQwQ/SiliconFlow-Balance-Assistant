@@ -37,7 +37,10 @@ const translations = {
         'lessThan3d': '< 3d',
         'sessionUsed': 'Total Used',
         'trackedKey': 'Tracked Key',
-        'days': 'd'
+        'days': 'd',
+        'hours': 'h',
+        'minutes': 'm',
+        'nextRefresh': 'Refresh:'
     },
     'zh-CN': {
         'title': 'SiliconFlow 余额助手',
@@ -77,7 +80,10 @@ const translations = {
         'lessThan3d': '< 3天',
         'sessionUsed': '累计消耗',
         'trackedKey': '跟踪的 Key',
-        'days': '天'
+        'days': '天',
+        'hours': '小时',
+        'minutes': '分',
+        'nextRefresh': '刷新:'
     },
     'zh-TW': {
         'title': 'SiliconFlow 餘額助手',
@@ -117,7 +123,10 @@ const translations = {
         'lessThan3d': '< 3天',
         'sessionUsed': '累計消耗',
         'trackedKey': '追蹤的 Key',
-        'days': '天'
+        'days': '天',
+        'hours': ' 小時',
+        'minutes': ' 分',
+        'nextRefresh': '刷新:'
     },
     'ja': {
         'title': 'SiliconFlow 残高アシスタント',
@@ -157,7 +166,10 @@ const translations = {
         'lessThan3d': '< 3日',
         'sessionUsed': '累積消費',
         'trackedKey': '追跡中キー',
-        'days': '日'
+        'days': '日',
+        'hours': '時間',
+        'minutes': '分',
+        'nextRefresh': '更新:'
     }
 };
 
