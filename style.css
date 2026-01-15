@@ -6,6 +6,7 @@
     --text-secondary: rgba(255, 255, 255, 0.6);
     --accent-color: #a78bfa;
     --success-color: #10b981;
+    --warning-color: #f59e0b;
     --error-color: #ef4444;
 }
 
@@ -492,7 +493,8 @@ button:disabled {
 /* Side Panel */
 .side-panel {
     flex: 1;
-    min-width: 0; /* Prevent flex overflow */
+    min-width: 0;
+    /* Prevent flex overflow */
     max-width: 580px;
     opacity: 1;
     transform: translateX(0);
@@ -505,6 +507,175 @@ button:disabled {
     transform: translateX(-20px);
 }
 
+/* Stats Card */
+.stats-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.stats-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.stats-percent-text {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--success-color);
+}
+
+.stats-main {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 32px;
+}
+
+/* Circular Progress */
+.circular-progress-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.circular-progress {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(var(--success-color) 360deg, rgba(255, 255, 255, 0.1) 0deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 1s ease-in-out;
+}
+
+.inner-circle {
+    position: absolute;
+    width: 84px;
+    height: 84px;
+    background: #0f172a;
+    /* Match body bg usually, or dark dark grey */
+    background: rgba(15, 23, 42, 0.9);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.inner-circle span:first-child {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.circle-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-transform: lowercase;
+}
+
+/* Linear Progress */
+.linear-progress-container {
+    flex: 1;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--success-color);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 1s ease-in-out;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding-top: 24px;
+    border-top: 1px solid var(--glass-border);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.text-green {
+    color: var(--success-color);
+}
+
+.text-orange {
+    color: var(--warning-color);
+}
+
+.text-red {
+    color: var(--error-color);
+}
+
+.bg-green {
+    background: var(--success-color);
+}
+
+.bg-orange {
+    background: var(--warning-color);
+}
+
+.bg-red {
+    background: var(--error-color);
+}
+
+/* Chart Wrapper */
 .chart-wrapper {
     background: var(--glass-bg);
     backdrop-filter: blur(16px);
@@ -551,7 +722,8 @@ button:disabled {
     .main-layout {
         flex-direction: column;
         align-items: center;
-        max-width: 460px; /* Limit width when stacked */
+        max-width: 460px;
+        /* Limit width when stacked */
     }
 
     .side-panel {

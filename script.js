@@ -207,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success && result.data.is_tracked && result.data.history.length > 0) {
                 renderBalanceChart(result.data.history);
+                updateStatsCard(result.data, apiKey);
                 historyChart.classList.remove('hidden');
             } else {
                 historyChart.classList.add('hidden');
@@ -214,6 +215,135 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Failed to load balance history:', error);
             historyChart.classList.add('hidden');
+        }
+    }
+
+    function updateStatsCard(data, apiKey) {
+        // Elements
+        const statsModelName = document.getElementById('statsModelName');
+        const statsPercentage = document.getElementById('statsPercentage');
+        const circleProgress = document.getElementById('circleProgress');
+        const circleText = document.getElementById('circleText');
+        const linearProgress = document.getElementById('linearProgress');
+        const linearProgressLabel = document.getElementById('linearProgressLabel');
+        const statsUpdateTime = document.getElementById('statsUpdateTime');
+        const statsUsed = document.getElementById('statsUsed');
+        const statsEta = document.getElementById('statsEta');
+        // Find Burn Rate element - it has class 'text-green' and data-i18n="minimal" by default
+        // We need a more reliable way to select it if IDs are missing, but let's traverse
+        const statItems = document.querySelectorAll('.stat-item');
+        let statsBurnRateValue = null;
+        if (statItems.length >= 2) {
+            statsBurnRateValue = statItems[1].querySelector('.stat-value');
+        }
+
+        // 1. Model Name / User ID
+        const currentUserName = document.getElementById('userName').textContent;
+        statsModelName.textContent = currentUserName !== 'User Name' ? currentUserName : 'Tracked Key';
+
+        // 2. Calculate Percentage
+        const history = data.history;
+        const initialRecord = data.initial_record || history[0];
+        const latestRecord = history[history.length - 1];
+
+        const initialBalance = parseFloat(initialRecord.balance);
+        const currentBalance = parseFloat(latestRecord.balance);
+
+        let percentage = 100;
+        if (initialBalance > 0) {
+            percentage = (currentBalance / initialBalance) * 100;
+        }
+        percentage = Math.max(0, Math.min(100, percentage));
+        const percentStr = Math.round(percentage) + '%';
+
+        // Percentage Color Logic
+        let colorClass = 'text-green';
+        let colorHex = '#10b981'; // Green
+        let bgClass = 'bg-green';
+
+        if (percentage < 20) {
+            colorClass = 'text-red';
+            colorHex = '#ef4444';
+            bgClass = 'bg-red';
+        } else if (percentage < 50) {
+            colorClass = 'text-orange';
+            colorHex = '#f59e0b';
+            bgClass = 'bg-orange';
+        }
+
+        // 3. Update Visuals
+        statsPercentage.className = `stats-percent-text ${colorClass}`;
+        statsPercentage.textContent = percentStr;
+
+        circleText.className = colorClass;
+        circleText.textContent = percentStr;
+
+        // Circular Progress Conic Gradient
+        circleProgress.style.background = `conic-gradient(${colorHex} ${percentage * 3.6}deg, rgba(255, 255, 255, 0.1) 0deg)`;
+
+        // Linear Progress
+        linearProgress.className = `progress-bar-fill ${bgClass}`;
+        linearProgress.style.width = percentage + '%';
+        linearProgressLabel.textContent = `Remaining: ${Math.round(percentage)}%`;
+
+        // 4. Grid Stats & Calculations
+
+        // Burn Rate & ETA
+        const startTime = new Date(initialRecord.checked_at).getTime();
+        const endTime = new Date(latestRecord.checked_at).getTime();
+        const hoursDiff = (endTime - startTime) / (1000 * 60 * 60);
+
+        let burnRateStatus = 'Minimal';
+        let burnRateColor = 'text-green';
+        let etaText = 'Safe';
+        let etaColor = 'text-green';
+
+        if (hoursDiff > 0) {
+            const usedAmount = initialBalance - currentBalance;
+            const hourlyBurn = usedAmount / hoursDiff;
+            // 1% per hour = Fast, 5% per hour = Very Fast
+            const hourlyPercentBurn = (hourlyBurn / initialBalance) * 100;
+
+            if (hourlyPercentBurn > 2) {
+                burnRateStatus = 'Very Fast';
+                burnRateColor = 'text-red';
+            } else if (hourlyPercentBurn > 0.5) {
+                burnRateStatus = 'Fast';
+                burnRateColor = 'text-orange';
+            }
+
+            // ETA
+            if (hourlyBurn > 0) {
+                const hoursLeft = currentBalance / hourlyBurn;
+                if (hoursLeft < 24) {
+                    etaText = `< 24h`;
+                    etaColor = 'text-red';
+                } else if (hoursLeft < 72) {
+                    etaText = `< 3d`;
+                    etaColor = 'text-orange';
+                } else {
+                    const daysLeft = Math.floor(hoursLeft / 24);
+                    etaText = `~${daysLeft}d`;
+                }
+            }
+        }
+
+        // Update Time
+        const updateDate = new Date(latestRecord.checked_at);
+        statsUpdateTime.textContent = updateDate.toLocaleTimeString(getCurrentLanguage(), { hour: '2-digit', minute: '2-digit' });
+
+        // Total Used
+        const usedAmount = initialBalance - currentBalance;
+        statsUsed.textContent = '¥' + usedAmount.toFixed(4);
+
+        // Apply Burn Rate & ETA
+        if (statsBurnRateValue) {
+            statsBurnRateValue.textContent = burnRateStatus;
+            statsBurnRateValue.className = `stat-value ${burnRateColor}`;
+        }
+        if (statsEta) {
+            statsEta.textContent = etaText;
+            statsEta.className = `stat-value ${etaColor}`;
         }
     }
 

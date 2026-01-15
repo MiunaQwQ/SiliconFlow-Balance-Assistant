@@ -52,6 +52,14 @@ try {
          ORDER BY checked_at ASC',
         [$trackedKey['id'], $days]
     );
+
+    // Get initial record for percentage calculation
+    $initialRecord = $db->queryOne(
+        'SELECT balance, checked_at FROM balance_history 
+         WHERE tracked_key_id = ? 
+         ORDER BY checked_at ASC LIMIT 1',
+        [$trackedKey['id']]
+    );
     
     Logger::info("Retrieved " . count($history) . " history records for tracked_key_id: {$trackedKey['id']}");
     
@@ -60,6 +68,7 @@ try {
         'tracked_key_id' => $trackedKey['id'],
         'days' => $days,
         'count' => count($history),
+        'initial_record' => $initialRecord,
         'history' => $history
     ], 'History data retrieved successfully');
     
