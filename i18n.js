@@ -15,7 +15,8 @@ const translations = {
         'errorFormat': 'Unknown response format',
         'unknownUser': 'Unknown User',
         'noEmail': 'No Email',
-        'errorTitle': 'Error'
+        'errorTitle': 'Error',
+        'userNamePersonal': 'Personal'
     },
     'zh-CN': {
         'title': 'SiliconFlow 余额助手',
@@ -33,7 +34,8 @@ const translations = {
         'errorFormat': '未知的响应格式',
         'unknownUser': '未知用户',
         'noEmail': '无邮箱',
-        'errorTitle': '错误'
+        'errorTitle': '错误',
+        'userNamePersonal': '个人'
     },
     'zh-TW': {
         'title': 'SiliconFlow 餘額助手',
@@ -51,7 +53,8 @@ const translations = {
         'errorFormat': '未知的響應格式',
         'unknownUser': '未知用戶',
         'noEmail': '無郵箱',
-        'errorTitle': '錯誤'
+        'errorTitle': '錯誤',
+        'userNamePersonal': '個人'
     },
     'ja': {
         'title': 'SiliconFlow 残高アシスタント',
@@ -69,7 +72,8 @@ const translations = {
         'errorFormat': '不明な応答形式',
         'unknownUser': '不明なユーザー',
         'noEmail': 'メールなし',
-        'errorTitle': 'エラー'
+        'errorTitle': 'エラー',
+        'userNamePersonal': '個人'
     }
 };
 

@@ -61,11 +61,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function displayResult(data) {
-        userName.textContent = data.name || t('unknownUser');
+        let displayName = data.name || t('unknownUser');
+        if (displayName === '个人') {
+            displayName = t('userNamePersonal');
+        }
+
+        userName.textContent = displayName;
         userEmail.textContent = data.email || t('noEmail');
 
         // Avatar Initial
-        const nameInitial = (data.name || 'U').charAt(0).toUpperCase();
+        const nameInitial = (displayName === t('unknownUser') ? 'U' : displayName.charAt(0)).toUpperCase();
         avatarName.textContent = nameInitial;
 
         // Balance
