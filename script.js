@@ -209,6 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderBalanceChart(result.data.history);
                 updateStatsCard(result.data, apiKey);
                 historyChart.classList.remove('hidden');
+                // Sync heights after render
+                setTimeout(syncCardHeights, 100);
             } else {
                 historyChart.classList.add('hidden');
             }
@@ -458,6 +460,45 @@ document.addEventListener('DOMContentLoaded', () => {
     function hideError() {
         errorContainer.classList.add('hidden');
     }
+
+    function syncCardHeights() {
+        const card = document.querySelector('.card');
+        const sidePanel = document.querySelector('.side-panel');
+
+        // Reset height first
+        card.style.minHeight = 'auto';
+
+        if (window.innerWidth >= 1100 && !sidePanel.classList.contains('hidden')) {
+            // Get side panel height including its children (Stats + Chart)
+            // Note: side-panel is absolute, so its clientHeight should be accurate if content is there
+            const sideHeight = sidePanel.offsetHeight;
+            const cardHeight = card.offsetHeight;
+
+            // If side panel is taller, stretch card
+            if (sideHeight > cardHeight) {
+                card.style.minHeight = sideHeight + 'px';
+            }
+        }
+    }
+
+    // Call sync on window resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(syncCardHeights, 100);
+    });
+
+    // Call sync when chart shows/hides
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.target.id === 'historyChart' || mutation.target.classList.contains('side-panel')) {
+                setTimeout(syncCardHeights, 50); // Small delay for rendering
+            }
+        });
+    });
+
+    // Observer config
+    observer.observe(historyChart, { attributes: true, attributeFilter: ['class'] });
 
     function setLoading(isLoading) {
         if (isLoading) {
