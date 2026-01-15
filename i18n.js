@@ -16,7 +16,12 @@ const translations = {
         'unknownUser': 'Unknown User',
         'noEmail': 'No Email',
         'errorTitle': 'Error',
-        'userNamePersonal': 'Personal'
+        'userNamePersonal': 'Personal',
+        'trackThisKey': 'Track This API Key',
+        'trackHint': 'Enable to periodically record balance changes',
+        'balanceHistory': 'Balance History',
+        'balance': 'Balance',
+        'trackingError': 'Failed to update tracking status'
     },
     'zh-CN': {
         'title': 'SiliconFlow 余额助手',
@@ -35,7 +40,12 @@ const translations = {
         'unknownUser': '未知用户',
         'noEmail': '无邮箱',
         'errorTitle': '错误',
-        'userNamePersonal': '个人'
+        'userNamePersonal': '个人',
+        'trackThisKey': '跟踪此 API Key',
+        'trackHint': '启用后将定期记录余额变化',
+        'balanceHistory': '余额历史',
+        'balance': '余额',
+        'trackingError': '更新跟踪状态失败'
     },
     'zh-TW': {
         'title': 'SiliconFlow 餘額助手',
@@ -54,7 +64,12 @@ const translations = {
         'unknownUser': '未知用戶',
         'noEmail': '無郵箱',
         'errorTitle': '錯誤',
-        'userNamePersonal': '個人'
+        'userNamePersonal': '個人',
+        'trackThisKey': '追蹤此 API Key',
+        'trackHint': '啟用後將定期記錄餘額變化',
+        'balanceHistory': '餘額歷史',
+        'balance': '餘額',
+        'trackingError': '更新追蹤狀態失敗'
     },
     'ja': {
         'title': 'SiliconFlow 残高アシスタント',
@@ -73,7 +88,12 @@ const translations = {
         'unknownUser': '不明なユーザー',
         'noEmail': 'メールなし',
         'errorTitle': 'エラー',
-        'userNamePersonal': '個人'
+        'userNamePersonal': '個人',
+        'trackThisKey': 'このAPIキーを追跡',
+        'trackHint': '有効にすると残高の変化が定期的に記録されます',
+        'balanceHistory': '残高履歴',
+        'balance': '残高',
+        'trackingError': '追跡ステータスの更新に失敗しました'
     }
 };
 

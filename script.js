@@ -1,3 +1,9 @@
+// Backend API base URL - Update this to your actual backend URL
+const BACKEND_URL = window.location.origin + '/backend/api';
+
+let currentApiKey = null;
+let balanceChart = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Language
     if (typeof initLanguage === 'function') {
@@ -18,6 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const userStatus = document.getElementById('userStatus');
     const userId = document.getElementById('userId');
 
+    // Tracking elements
+    const trackToggle = document.getElementById('trackToggle');
+    const historyChart = document.getElementById('historyChart');
+    const balanceCanvas = document.getElementById('balanceCanvas');
+
     checkBtn.addEventListener('click', async () => {
         const apiKey = apiKeyInput.value.trim();
 
@@ -29,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset UI
         hideError();
         resultContainer.classList.add('hidden');
+        historyChart.classList.add('hidden');
         setLoading(true);
 
         try {
@@ -43,12 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (!response.ok) {
-                // Handle API specific errors
                 throw new Error(data.message || t('errorGeneric'));
             }
 
             if (data.code === 20000 && data.data) {
+                currentApiKey = apiKey;
                 displayResult(data.data);
+                await checkTrackingStatus(apiKey, data.data);
             } else {
                 throw new Error(data.message || t('errorFormat'));
             }
@@ -60,15 +73,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Tracking toggle handler
+    trackToggle.addEventListener('change', async (e) => {
+        if (!currentApiKey) return;
+
+        const isChecked = e.target.checked;
+
+        try {
+            if (isChecked) {
+                await enableTracking(currentApiKey);
+            } else {
+                await disableTracking(currentApiKey);
+            }
+        } catch (error) {
+            console.error('Tracking toggle error:', error);
+            // Revert checkbox state on error
+            e.target.checked = !isChecked;
+            showError(t('trackingError') || 'Failed to update tracking status');
+        }
+    });
+
     function displayResult(data) {
-        // API might return 'name', 'username', or just 'email'
         let displayName = data.name || data.username || data.nickname || '';
 
         // Handle User Name
         if (!displayName) {
             userName.setAttribute('data-i18n', 'unknownUser');
             userName.textContent = t('unknownUser');
-            displayName = 'U'; // For avatar
+            displayName = 'U';
         } else if (displayName === '个人') {
             userName.setAttribute('data-i18n', 'userNamePersonal');
             userName.textContent = t('userNamePersonal');
@@ -98,13 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const statusText = data.status === 'blocked' ? t('statusBlocked') : t('statusActive');
         userStatus.textContent = statusText;
         userStatus.className = 'value ' + (data.status === 'blocked' ? 'status-error' : 'status-active');
-        // Add data-i18n for status if it matches standard keys, but since it's dynamic based on value, 
-        // we set textContent directly. We could use setAttribute('data-i18n', ...) if we wanted dynamic updates 
-        // when language changes while result is shown, but for now we'll just set text.
-        // To support dynamic language switch while result is open, we can store the status in a dataset or variable
-        // and re-render. Ideally `applyTranslations` could handle this if we set a specific attribute.
-        // For simplicity, we might just leave it as textContent. 
-        // Better yet: set data-i18n attribute dynamically so language switch effects it immediately.
+
         if (data.status === 'blocked') {
             userStatus.setAttribute('data-i18n', 'statusBlocked');
         } else {
@@ -114,6 +140,184 @@ document.addEventListener('DOMContentLoaded', () => {
         userId.textContent = data.id || 'N/A';
 
         resultContainer.classList.remove('hidden');
+    }
+
+    async function checkTrackingStatus(apiKey, userData) {
+        try {
+            const response = await fetch(`${BACKEND_URL}/track_key.php?action=status&api_key=${encodeURIComponent(apiKey)}`);
+            const result = await response.json();
+
+            if (result.success && result.data.is_tracked) {
+                trackToggle.checked = true;
+                await loadBalanceHistory(apiKey);
+            } else {
+                trackToggle.checked = false;
+            }
+        } catch (error) {
+            console.error('Failed to check tracking status:', error);
+            // Silent fail - user can still manually toggle tracking
+        }
+    }
+
+    async function enableTracking(apiKey) {
+        const formData = new FormData();
+        formData.append('api_key', apiKey);
+        formData.append('user_id', userId.textContent);
+        formData.append('user_email', userEmail.textContent);
+
+        const response = await fetch(`${BACKEND_URL}/track_key.php?action=add`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to enable tracking');
+        }
+
+        console.log('Tracking enabled successfully');
+        // After enabling, try to load history if any exists
+        await loadBalanceHistory(apiKey);
+    }
+
+    async function disableTracking(apiKey) {
+        const formData = new FormData();
+        formData.append('api_key', apiKey);
+
+        const response = await fetch(`${BACKEND_URL}/track_key.php?action=remove`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to disable tracking');
+        }
+
+        console.log('Tracking disabled successfully');
+        historyChart.classList.add('hidden');
+    }
+
+    async function loadBalanceHistory(apiKey, days = 7) {
+        try {
+            const response = await fetch(`${BACKEND_URL}/get_history.php?api_key=${encodeURIComponent(apiKey)}&days=${days}`);
+            const result = await response.json();
+
+            if (result.success && result.data.is_tracked && result.data.history.length > 0) {
+                renderBalanceChart(result.data.history);
+                historyChart.classList.remove('hidden');
+            } else {
+                historyChart.classList.add('hidden');
+            }
+        } catch (error) {
+            console.error('Failed to load balance history:', error);
+            historyChart.classList.add('hidden');
+        }
+    }
+
+    function renderBalanceChart(historyData) {
+        if (balanceChart) {
+            balanceChart.destroy();
+        }
+
+        const ctx = balanceCanvas.getContext('2d');
+
+        // Prepare data
+        const labels = historyData.map(item => {
+            const date = new Date(item.checked_at);
+            return date.toLocaleString(getCurrentLanguage(), {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        });
+
+        const balances = historyData.map(item => parseFloat(item.balance));
+
+        // Create gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(102, 126, 234, 0.4)');
+        gradient.addColorStop(1, 'rgba(102, 126, 234, 0.0)');
+
+        balanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: t('balance') || 'Balance',
+                    data: balances,
+                    borderColor: '#667eea',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#667eea',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#667eea',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            label: function (context) {
+                                return `${t('balance') || 'Balance'}: ¥${context.parsed.y.toFixed(2)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.6)',
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.6)',
+                            callback: function (value) {
+                                return '¥' + value.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function getCurrentLanguage() {
+        const langSelect = document.getElementById('langSelect');
+        return langSelect ? langSelect.value : 'zh-CN';
     }
 
     function showError(message) {
@@ -126,9 +330,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setLoading(isLoading) {
-        // When finding checkBtn, we need to be careful if we replaced its content or text.
-        // The HTML structure is <button><span class="btn-text">Check Balance</span><span class="btn-loader"></span></button>
-        // We only change class on button.
         if (isLoading) {
             checkBtn.classList.add('loading');
             checkBtn.disabled = true;

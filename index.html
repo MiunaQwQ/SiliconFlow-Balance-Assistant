@@ -80,6 +80,22 @@
                     <span class="label" data-i18n="userId">User ID:</span>
                     <span class="value-text" id="userId">...</span>
                 </div>
+
+                <!-- Tracking Control -->
+                <div class="track-control">
+                    <label class="track-checkbox">
+                        <input type="checkbox" id="trackToggle">
+                        <span class="checkmark"></span>
+                        <span class="track-label" data-i18n="trackThisKey">Track This API Key</span>
+                    </label>
+                    <p class="track-hint" data-i18n="trackHint">Enable to periodically record balance changes</p>
+                </div>
+
+                <!-- Balance History Chart -->
+                <div id="historyChart" class="chart-container hidden">
+                    <h3 class="chart-title" data-i18n="balanceHistory">Balance History</h3>
+                    <canvas id="balanceCanvas"></canvas>
+                </div>
             </div>
 
             <div id="error" class="error-message hidden">
@@ -93,6 +109,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="i18n.js"></script>
     <script src="script.js"></script>
 </body>

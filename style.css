@@ -395,3 +395,123 @@ button:disabled {
     margin-right: 8px;
     flex-shrink: 0;
 }
+
+/* Tracking Control */
+.track-control {
+    margin-top: 24px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.track-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-left: 32px;
+}
+
+.track-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.track-checkbox .checkmark {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 20px;
+    width: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--glass-border);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.track-checkbox:hover .checkmark {
+    border-color: var(--accent-color);
+    background: rgba(167, 139, 250, 0.1);
+}
+
+.track-checkbox input[type="checkbox"]:checked~.checkmark {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #764ba2;
+}
+
+.track-checkbox .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.track-checkbox input[type="checkbox"]:checked~.checkmark:after {
+    display: block;
+}
+
+.track-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.track-hint {
+    margin-top: 8px;
+    margin-left: 32px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Chart Container */
+.chart-container {
+    margin-top: 24px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #fff;
+}
+
+#balanceCanvas {
+    max-height: 300px;
+    width: 100% !important;
+    height: auto !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .container {
+        max-width: 100%;
+    }
+
+    .card {
+        padding: 24px;
+        border-radius: 16px;
+    }
+
+    #balanceCanvas {
+        max-height: 250px;
+    }
+}
