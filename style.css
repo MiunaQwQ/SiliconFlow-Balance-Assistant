@@ -598,12 +598,7 @@ button:disabled {
     margin-bottom: 24px;
 }
 
-.stats-header h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    margin: 0;
-}
+
 
 .stats-percent-text {
     font-size: 24px;
