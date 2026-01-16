@@ -470,6 +470,13 @@ button:disabled {
     border: 1px solid var(--glass-border);
     border-radius: 12px;
     animation: fadeIn 0.5s ease forwards;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.track-control:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-color);
 }
 
 .track-checkbox {
@@ -541,6 +548,193 @@ button:disabled {
     font-size: 12px;
     color: var(--text-secondary);
     line-height: 1.5;
+}
+
+/* History Control  */
+.history-control {
+    margin-top: 24px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.history-control:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-color);
+}
+
+.history-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-left: 32px;
+}
+
+.history-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.history-checkbox .checkmark {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 20px;
+    width: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--glass-border);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.history-checkbox:hover .checkmark {
+    border-color: var(--accent-color);
+    background: rgba(167, 139, 250, 0.1);
+}
+
+.history-checkbox input[type="checkbox"]:checked~.checkmark {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #764ba2;
+}
+
+.history-checkbox .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.history-checkbox input[type="checkbox"]:checked~.checkmark:after {
+    display: block;
+}
+
+.history-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.history-hint {
+    margin-top: 8px;
+    margin-left: 32px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Query History List */
+.history-list-container {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.history-list-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.history-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: var(--accent-color);
+}
+
+.history-key {
+    font-size: 13px;
+    color: var(--text-primary);
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-time {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.history-use-btn,
+.history-delete-btn {
+    padding: 4px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.history-use-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+}
+
+.history-use-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.history-delete-btn {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    padding: 4px 8px;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.history-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+}
+
+.history-empty {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+    font-size: 13px;
 }
 
 /* Side Panel */
@@ -1165,4 +1359,91 @@ button:disabled {
     border-radius: 20px;
     letter-spacing: 0.5px;
     border: 1px solid var(--glass-border);
+}
+
+/* Query History Control (Always Visible) */
+.history-control {
+    margin-top: 24px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.history-control:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-color);
+}
+
+.history-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-left: 32px;
+}
+
+.history-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.history-checkbox .checkmark {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 20px;
+    width: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--glass-border);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.history-checkbox:hover .checkmark {
+    border-color: var(--accent-color);
+    background: rgba(167, 139, 250, 0.1);
+}
+
+.history-checkbox input[type="checkbox"]:checked~.checkmark {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #764ba2;
+}
+
+.history-checkbox .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.history-checkbox input[type="checkbox"]:checked~.checkmark:after {
+    display: block;
+}
+
+.history-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.history-hint {
+    margin-top: 8px;
+    margin-left: 32px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
 }

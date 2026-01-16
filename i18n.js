@@ -19,6 +19,8 @@ const translations = {
         'userNamePersonal': 'Personal',
         'trackThisKey': 'Track This API Key',
         'trackHint': 'Enable to periodically record balance changes',
+        'recordQueryHistory': 'Record Query History',
+        'historyHint': 'Save query records for future reference',
         'balanceHistory': 'Balance History',
         'balance': 'Balance',
         'balance': 'Balance',
@@ -58,7 +60,10 @@ const translations = {
         'subTypeSpeechToText': 'Speech-to-Text',
         'subTypeTextToVideo': 'Text-to-Video',
         'copied': 'Copied',
-        'copyFailed': 'Failed to copy'
+        'copyFailed': 'Failed to copy',
+        'queryHistory': 'Query History',
+        'noHistory': 'No query history yet',
+        'use': 'Use'
     },
     'zh-CN': {
         'title': 'SiliconFlow 余额助手',
@@ -80,6 +85,8 @@ const translations = {
         'userNamePersonal': '个人',
         'trackThisKey': '跟踪此 API Key',
         'trackHint': '启用后将定期记录余额变化',
+        'recordQueryHistory': '是否记录查询历史',
+        'historyHint': '保存查询记录以便日后参考',
         'balanceHistory': '余额历史',
         'balance': '余额',
         'balance': '余额',
@@ -119,7 +126,10 @@ const translations = {
         'subTypeSpeechToText': '语音转文字',
         'subTypeTextToVideo': '文生视频',
         'copied': '已复制',
-        'copyFailed': '复制失败'
+        'copyFailed': '复制失败',
+        'queryHistory': '查询历史',
+        'noHistory': '暂无查询历史',
+        'use': '使用'
     },
     'zh-TW': {
         'title': 'SiliconFlow 餘額助手',
@@ -141,6 +151,8 @@ const translations = {
         'userNamePersonal': '個人',
         'trackThisKey': '追蹤此 API Key',
         'trackHint': '啟用後將定期記錄餘額變化',
+        'recordQueryHistory': '是否記錄查詢歷史',
+        'historyHint': '保存查詢記錄以便日後參考',
         'balanceHistory': '餘額歷史',
         'balance': '餘額',
         'balance': '餘額',
@@ -180,7 +192,10 @@ const translations = {
         'subTypeSpeechToText': '語音轉文字',
         'subTypeTextToVideo': '文生影片',
         'copied': '已複製',
-        'copyFailed': '複製失敗'
+        'copyFailed': '複製失敗',
+        'queryHistory': '查詢歷史',
+        'noHistory': '暫無查詢歷史',
+        'use': '使用'
     },
     'ja': {
         'title': 'SiliconFlow 残高アシスタント',
@@ -202,6 +217,8 @@ const translations = {
         'userNamePersonal': '個人',
         'trackThisKey': 'このAPIキーを追跡',
         'trackHint': '有効にすると残高の変化が定期的に記録されます',
+        'recordQueryHistory': 'クエリ履歴を記録',
+        'historyHint': '今後の参照用にクエリ記録を保存',
         'balanceHistory': '残高履歴',
         'balance': '残高',
         'balance': '残高',
@@ -241,7 +258,10 @@ const translations = {
         'subTypeSpeechToText': '音声からテキスト',
         'subTypeTextToVideo': 'テキストから動画',
         'copied': 'コピーしました',
-        'copyFailed': 'コピーに失敗しました'
+        'copyFailed': 'コピーに失敗しました',
+        'queryHistory': 'クエリ履歴',
+        'noHistory': 'クエリ履歴はまだありません',
+        'use': '使用'
     }
 };
 

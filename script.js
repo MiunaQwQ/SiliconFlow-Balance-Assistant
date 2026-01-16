@@ -29,11 +29,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyChart = document.getElementById('historyChart');
     const balanceCanvas = document.getElementById('balanceCanvas');
 
+    // History toggle element
+    const historyToggle = document.getElementById('historyToggle');
+
     // Model list elements
     const modelList = document.getElementById('modelList');
     const modelsLoading = document.getElementById('modelsLoading');
     const modelsContent = document.getElementById('modelsContent');
     const modelsEmpty = document.getElementById('modelsEmpty');
+
+    // Initialize history toggle from localStorage
+    const savedHistoryPreference = localStorage.getItem('sf_record_history');
+    if (savedHistoryPreference !== null) {
+        historyToggle.checked = savedHistoryPreference === 'true';
+    }
 
     checkBtn.addEventListener('click', async () => {
         const apiKey = apiKeyInput.value.trim();
@@ -47,6 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
         hideError();
         resultContainer.classList.add('hidden');
         historyChart.classList.add('hidden');
+
+        // Hide tracking container
+        const trackingContainer = document.getElementById('trackingContainer');
+        if (trackingContainer) {
+            trackingContainer.classList.add('hidden');
+        }
+
         setLoading(true);
 
         try {
@@ -70,6 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 await checkTrackingStatus(apiKey, data.data);
                 // Fetch and display supported models
                 await fetchModels(apiKey);
+                // Save to query history if enabled
+                saveQueryHistory(apiKey);
             } else {
                 throw new Error(data.message || t('errorFormat'));
             }
@@ -100,6 +118,185 @@ document.addEventListener('DOMContentLoaded', () => {
             showError(t('trackingError') || 'Failed to update tracking status');
         }
     });
+
+    // Make entire track-control card clickable
+    const trackControl = document.querySelector('.track-control');
+    if (trackControl) {
+        trackControl.addEventListener('click', (e) => {
+            // Don't trigger if clicking directly on checkbox or label (they handle it themselves)
+            if (e.target === trackToggle || e.target.closest('.track-checkbox')) {
+                return;
+            }
+            // Toggle the checkbox
+            trackToggle.click();
+        });
+    }
+
+    // History toggle handler
+    historyToggle.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        localStorage.setItem('sf_record_history', isChecked.toString());
+        console.log('Query history recording:', isChecked ? 'enabled' : 'disabled');
+        // Update history display
+        updateHistoryDisplay();
+    });
+
+    // Save query to history
+    function saveQueryHistory(apiKey) {
+        // Check if history recording is enabled
+        const isHistoryEnabled = localStorage.getItem('sf_record_history') === 'true';
+        if (!isHistoryEnabled) {
+            return;
+        }
+
+        // Get existing history
+        let history = [];
+        try {
+            const stored = localStorage.getItem('sf_query_history');
+            if (stored) {
+                history = JSON.parse(stored);
+            }
+        } catch (e) {
+            console.error('Failed to parse query history:', e);
+            history = [];
+        }
+
+        // Remove duplicate if exists
+        history = history.filter(item => item.key !== apiKey);
+
+        // Add new entry at the beginning
+        history.unshift({
+            key: apiKey,
+            timestamp: new Date().toISOString(),
+            // Mask the key for display (show first 8 and last 4 characters)
+            display: apiKey.length > 12 ? `${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}` : apiKey
+        });
+
+        // Keep only latest 10 entries
+        if (history.length > 10) {
+            history = history.slice(0, 10);
+        }
+
+        // Save back to localStorage
+        try {
+            localStorage.setItem('sf_query_history', JSON.stringify(history));
+            updateHistoryDisplay();
+        } catch (e) {
+            console.error('Failed to save query history:', e);
+        }
+    }
+
+    // Load and display query history
+    function updateHistoryDisplay() {
+        const isHistoryEnabled = localStorage.getItem('sf_record_history') === 'true';
+        const historyContainer = document.getElementById('queryHistoryList');
+        const historyListContainer = document.getElementById('queryHistoryContainer');
+
+        if (!historyContainer || !historyListContainer) return;
+
+        // Don't show history if query result is already displayed
+        const resultContainer = document.getElementById('result');
+        if (resultContainer && !resultContainer.classList.contains('hidden')) {
+            historyListContainer.classList.add('hidden');
+            return;
+        }
+
+        if (!isHistoryEnabled) {
+            historyContainer.innerHTML = '';
+            historyListContainer.classList.add('hidden');
+            return;
+        }
+
+        let history = [];
+        try {
+            const stored = localStorage.getItem('sf_query_history');
+            if (stored) {
+                history = JSON.parse(stored);
+            }
+        } catch (e) {
+            console.error('Failed to load query history:', e);
+        }
+
+        if (history.length === 0) {
+            historyContainer.innerHTML = '<p class="history-empty" data-i18n="noHistory">No query history yet</p>';
+            historyListContainer.classList.remove('hidden');
+            return;
+        }
+
+        // Build history list
+        historyContainer.innerHTML = '';
+        historyListContainer.classList.remove('hidden');
+
+        history.forEach((item, index) => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+
+            const keyDisplay = document.createElement('div');
+            keyDisplay.className = 'history-key';
+            keyDisplay.textContent = item.display;
+
+            const timeDisplay = document.createElement('div');
+            timeDisplay.className = 'history-time';
+            const itemDate = new Date(item.timestamp);
+            timeDisplay.textContent = itemDate.toLocaleString(getCurrentLanguage(), {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const useButton = document.createElement('button');
+            useButton.className = 'history-use-btn';
+            useButton.textContent = t('use') || 'Use';
+            useButton.onclick = () => {
+                document.getElementById('apiKey').value = item.key;
+            };
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'history-delete-btn';
+            deleteButton.innerHTML = '×';
+            deleteButton.onclick = () => {
+                deleteHistoryItem(index);
+            };
+
+            historyItem.appendChild(keyDisplay);
+            historyItem.appendChild(timeDisplay);
+            historyItem.appendChild(useButton);
+            historyItem.appendChild(deleteButton);
+            historyContainer.appendChild(historyItem);
+        });
+    }
+
+    // Delete a history item
+    function deleteHistoryItem(index) {
+        try {
+            const stored = localStorage.getItem('sf_query_history');
+            if (!stored) return;
+
+            let history = JSON.parse(stored);
+            history.splice(index, 1);
+            localStorage.setItem('sf_query_history', JSON.stringify(history));
+            updateHistoryDisplay();
+        } catch (e) {
+            console.error('Failed to delete history item:', e);
+        }
+    }
+
+    // Initialize history display on page load
+    updateHistoryDisplay();
+
+    // Make entire history-control card clickable
+    const historyControl = document.querySelector('.history-control');
+    if (historyControl) {
+        historyControl.addEventListener('click', (e) => {
+            // Don't trigger if clicking directly on checkbox or label (they handle it themselves)
+            if (e.target === historyToggle || e.target.closest('.history-checkbox')) {
+                return;
+            }
+            // Toggle the checkbox
+            historyToggle.click();
+        });
+    }
 
     function displayResult(data) {
         let displayName = data.name || data.username || data.nickname || '';
@@ -148,6 +345,18 @@ document.addEventListener('DOMContentLoaded', () => {
         userId.textContent = data.id || 'N/A';
 
         resultContainer.classList.remove('hidden');
+
+        // Hide query history container when showing results
+        const historyListContainer = document.getElementById('queryHistoryContainer');
+        if (historyListContainer) {
+            historyListContainer.classList.add('hidden');
+        }
+
+        // Show tracking container
+        const trackingContainer = document.getElementById('trackingContainer');
+        if (trackingContainer) {
+            trackingContainer.classList.remove('hidden');
+        }
     }
 
     async function checkTrackingStatus(apiKey, userData) {
