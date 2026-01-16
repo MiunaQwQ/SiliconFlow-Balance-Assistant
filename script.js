@@ -271,9 +271,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!lastUpdateTime || !refreshCountdownElement) return;
 
         const now = Date.now();
-        const elapsed = now - lastUpdateTime;
         const refreshInterval = 5 * 60 * 1000; // 5 minutes in ms
-        const remaining = refreshInterval - elapsed;
+        const nextRefreshTime = lastUpdateTime + refreshInterval;
+        const remaining = nextRefreshTime - now;
+
+        // Debug logging (only log occasionally to avoid spam)
+        if (Math.random() < 0.05) { // Log ~5% of the time
+            console.log('Countdown Debug:', {
+                lastUpdateTime,
+                now,
+                nextRefreshTime,
+                remaining,
+                remainingSeconds: Math.floor(remaining / 1000)
+            });
+        }
 
         if (remaining <= 0) {
             // Time to refresh - refresh entire page data
@@ -326,8 +337,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderBalanceChart(result.data.history);
                 updateStatsCard(result.data, apiKey);
                 historyChart.classList.remove('hidden');
-                // Update last update time and start countdown
-                lastUpdateTime = Date.now();
+                // Get the actual last update time from the latest record
+                const latestRecord = result.data.history[result.data.history.length - 1];
+                lastUpdateTime = new Date(latestRecord.checked_at).getTime();
+
+                // Debug logging
+                console.log('Latest record checked_at:', latestRecord.checked_at);
+                console.log('lastUpdateTime (ms):', lastUpdateTime);
+                console.log('Current time (ms):', Date.now());
+                console.log('Time difference (seconds):', (Date.now() - lastUpdateTime) / 1000);
+
                 startCountdown();
             } else {
                 historyChart.classList.add('hidden');

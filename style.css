@@ -1139,7 +1139,9 @@ button:disabled {
     width: 18px;
     height: 18px;
     stroke-width: 2.5;
-}/* Models Header */
+}
+
+/* Models Header */
 .models-header {
     display: flex;
     justify-content: space-between;
