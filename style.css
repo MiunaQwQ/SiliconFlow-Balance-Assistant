@@ -107,6 +107,20 @@ body {
     flex-shrink: 0;
     margin: 0 auto;
     /* Center in standard flow */
+
+    /* Mobile Order: 1. Main Card */
+    order: 1;
+}
+
+/* Side Panels Default (Mobile) Order */
+.side-panel.left-panel {
+    /* Mobile Order: 3. Models List (Bottom) */
+    order: 3;
+}
+
+.side-panel:not(.left-panel) {
+    /* Mobile Order: 2. Chart (Middle) */
+    order: 2;
 }
 
 .card {
@@ -802,12 +816,16 @@ button:disabled {
         grid-column: 1;
         justify-self: end;
         width: 400px;
+        order: 1;
+        /* Desktop Order: 1 */
     }
 
     /* Main Card: In center column */
     .card {
         grid-column: 2;
         width: 400px;
+        order: 2;
+        /* Desktop Order: 2 */
     }
 
     /* Right Panel: In third column, pushed left */
@@ -815,6 +833,8 @@ button:disabled {
         grid-column: 3;
         justify-self: start;
         width: 500px;
+        order: 3;
+        /* Desktop Order: 3 */
     }
 
     /* Specific overrides */
@@ -823,6 +843,8 @@ button:disabled {
     .models-list {
         flex: 1;
         overflow-y: auto;
+        max-height: none;
+        /* Reset constraint for desktop full height */
         /* Custom scrollbar styling matches global */
     }
 
@@ -1126,6 +1148,11 @@ button:disabled {
     .main-layout {
         max-width: 100%;
     }
+
+    /* Constrain model list height on mobile/tablet */
+    .models-list {
+        max-height: 800px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1163,6 +1190,7 @@ button:disabled {
     overflow-x: hidden;
     margin-top: 16px;
     padding-right: 8px;
+    /* max-height constraint moved to media query */
 }
 
 /* Custom scrollbar for models list */
