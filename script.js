@@ -919,7 +919,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeInfo.type) {
                 const badge = document.createElement('span');
                 badge.className = `model-badge badge-${typeInfo.type}`;
-                badge.textContent = t(`type${capitalize(typeInfo.type)}`) || typeInfo.type;
+                const i18nKey = `type${capitalize(typeInfo.type)}`;
+                badge.setAttribute('data-i18n', i18nKey);
+                badge.textContent = t(i18nKey) || typeInfo.type;
                 modelMeta.appendChild(badge);
             }
 
