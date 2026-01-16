@@ -450,28 +450,64 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function refreshAllData() {
-        if (!currentApiKey) return;
+        if (!currentApiKey) {
+            console.warn('refreshAllData: No currentApiKey available');
+            return;
+        }
 
         try {
-            // Fetch fresh user info from SiliconFlow API
-            const response = await fetch('https://api.siliconflow.cn/v1/user/info', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${currentApiKey}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            console.log('=== Starting data refresh from database ===');
+            console.log('API Key (masked):', currentApiKey.substring(0, 8) + '...');
 
-            const data = await response.json();
+            // Fetch latest balance from database instead of SiliconFlow API
+            const url = `${BACKEND_URL}/get_latest_balance.php?api_key=${encodeURIComponent(currentApiKey)}`;
+            console.log('Fetching from:', url);
 
-            if (response.ok && data.code === 20000 && data.data) {
+            const response = await fetch(url);
+            console.log('Response status:', response.status, response.statusText);
+
+            const result = await response.json();
+            console.log('API Response:', result);
+
+            if (result.success && result.data) {
+                console.log('✓ Database refresh successful:', result.data);
+
+                // Get current user info from the page to preserve name/email
+                const currentName = document.getElementById('userName')?.textContent || '';
+                const currentEmail = document.getElementById('userEmail')?.textContent || '';
+
+                // Transform database response to match the format expected by displayResult
+                const userData = {
+                    balance: result.data.balance,
+                    totalBalance: result.data.balance,
+                    status: result.data.status,
+                    id: result.data.user_id,
+                    // Preserve existing name/email since database doesn't store these
+                    name: currentName,
+                    email: currentEmail
+                };
+
+                console.log('Transformed userData:', userData);
+
                 // Update main card
-                displayResult(data.data);
-                // Refresh tracking status and chart
-                await checkTrackingStatus(currentApiKey, data.data);
+                displayResult(userData);
+                console.log('✓ Main card updated');
+
+                // Refresh chart data from database
+                await loadBalanceHistory(currentApiKey);
+                console.log('✓ Chart data refreshed');
+
+                console.log('=== Data refresh completed successfully ===');
+            } else {
+                console.warn('⚠ Database refresh returned no data or failed:', result);
+                if (result.message) {
+                    console.warn('Error message:', result.message);
+                }
             }
         } catch (error) {
-            console.error('Auto-refresh failed:', error);
+            console.error('✗ Auto-refresh failed:', error);
+            console.error('Error details:', error.message, error.stack);
+            // On error, could fall back to direct API call if needed
         }
     }
 
