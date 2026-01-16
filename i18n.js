@@ -63,7 +63,21 @@ const translations = {
         'copyFailed': 'Failed to copy',
         'queryHistory': 'Query History',
         'noHistory': 'No query history yet',
-        'use': 'Use'
+        'use': 'Use',
+        'adminTitle': 'API Keys Dashboard',
+        'adminSubtitle': 'Manage and monitor all tracked keys',
+        'backToMain': 'Back',
+        'noTrackedKeys': 'No keys are being tracked',
+        'startTracking': 'Start tracking keys in the main page',
+        'goToMain': 'Go to Main Page',
+        'errorLoadingKeys': 'Failed to load keys',
+        'retry': 'Retry',
+        'maskedKey': 'API Key',
+        'userEmailLabel': 'User Email',
+        'accountStatus': 'Status',
+        'currentBalance': 'Balance',
+        'statusUnknown': 'Unknown',
+        'dashboard': 'Dashboard'
     },
     'zh-CN': {
         'title': 'SiliconFlow 余额助手',
@@ -129,7 +143,21 @@ const translations = {
         'copyFailed': '复制失败',
         'queryHistory': '查询历史',
         'noHistory': '暂无查询历史',
-        'use': '使用'
+        'use': '使用',
+        'adminTitle': 'API Keys 控制台',
+        'adminSubtitle': '管理和监控所有跟踪的密钥',
+        'backToMain': '返回',
+        'noTrackedKeys': '暂无跟踪的密钥',
+        'startTracking': '在主页面开始跟踪密钥',
+        'goToMain': '前往主页',
+        'errorLoadingKeys': '加载密钥失败',
+        'retry': '重试',
+        'maskedKey': 'API Key',
+        'userEmailLabel': '用户邮箱',
+        'accountStatus': '状态',
+        'currentBalance': '余额',
+        'statusUnknown': '未知',
+        'dashboard': '控制台'
     },
     'zh-TW': {
         'title': 'SiliconFlow 餘額助手',
@@ -195,7 +223,21 @@ const translations = {
         'copyFailed': '複製失敗',
         'queryHistory': '查詢歷史',
         'noHistory': '暫無查詢歷史',
-        'use': '使用'
+        'use': '使用',
+        'adminTitle': 'API Keys 控制台',
+        'adminSubtitle': '管理和監控所有追蹤的金鑰',
+        'backToMain': '返回',
+        'noTrackedKeys': '暫無追蹤的金鑰',
+        'startTracking': '在主頁面開始追蹤金鑰',
+        'goToMain': '前往主頁',
+        'errorLoadingKeys': '載入金鑰失敗',
+        'retry': '重試',
+        'maskedKey': 'API Key',
+        'userEmailLabel': '用戶郵箱',
+        'accountStatus': '狀態',
+        'currentBalance': '餘額',
+        'statusUnknown': '未知',
+        'dashboard': '控制台'
     },
     'ja': {
         'title': 'SiliconFlow 残高アシスタント',
@@ -261,7 +303,21 @@ const translations = {
         'copyFailed': 'コピーに失敗しました',
         'queryHistory': 'クエリ履歴',
         'noHistory': 'クエリ履歴はまだありません',
-        'use': '使用'
+        'use': '使用',
+        'adminTitle': 'APIキー ダッシュボード',
+        'adminSubtitle': '追跡中のすべてのキーを管理・監視',
+        'backToMain': '戻る',
+        'noTrackedKeys': '追跡中のキーがありません',
+        'startTracking': 'メインページでキーの追跡を開始',
+        'goToMain': 'メインページへ',
+        'errorLoadingKeys': 'キーの読み込みに失敗しました',
+        'retry': '再試行',
+        'maskedKey': 'APIキー',
+        'userEmailLabel': 'ユーザーメール',
+        'accountStatus': 'ステータス',
+        'currentBalance': '残高',
+        'statusUnknown': '不明',
+        'dashboard': 'ダッシュボード'
     }
 };
 
