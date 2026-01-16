@@ -50,7 +50,7 @@ try {
     $keys = $db->query($query);
     
     // Process each key to mask the API key and calculate percentage
-    $processedKeys = array_map(function($key) {
+    $processedKeys = array_map(function($key) use ($db) {
         // Decrypt and mask API key
         $decryptedKey = Crypto::decrypt($key['api_key_encrypted']);
         $maskedKey = maskApiKey($decryptedKey);
@@ -67,6 +67,16 @@ try {
             $used = $key['initial_balance'] - $key['current_balance'];
         }
         
+        // Fetch recent 48-hour history for burn rate calculation
+        $recentHistoryQuery = "
+            SELECT balance, checked_at
+            FROM balance_history
+            WHERE tracked_key_id = :key_id
+            AND checked_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+            ORDER BY checked_at ASC
+        ";
+        $recentHistory = $db->query($recentHistoryQuery, ['key_id' => $key['id']]);
+        
         return [
             'id' => $key['id'],
             'full_key' => $decryptedKey, // Decrypted key for copy functionality
@@ -81,7 +91,8 @@ try {
             'last_checked_at' => $key['last_checked_at'],
             'last_update' => $key['last_update'],
             'initial_check_time' => $key['initial_check_time'],
-            'created_at' => $key['created_at']
+            'created_at' => $key['created_at'],
+            'recent_history' => $recentHistory // 48-hour history for burn rate
         ];
     }, $keys);
     

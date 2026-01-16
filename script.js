@@ -642,53 +642,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 4. Grid Stats & Calculations
 
-        // Burn Rate & ETA
-        const startTime = new Date(initialRecord.checked_at).getTime();
-        const endTime = new Date(latestRecord.checked_at).getTime();
-        const hoursDiff = (endTime - startTime) / (1000 * 60 * 60);
+        // Burn Rate & ETA - Using Sliding Window (30 minutes)
+        const now = new Date().getTime();
+        const windowSize = 30 * 60 * 1000; // 30 minutes in milliseconds
+        const windowStart = now - windowSize;
+
+        // Filter records within the 48-hour window
+        const recentRecords = history.filter(record => {
+            const recordTime = new Date(record.checked_at).getTime();
+            return recordTime >= windowStart;
+        });
 
         let burnRateStatus = t('minimal');
         let burnRateColor = 'text-green';
         let etaText = t('safe');
-        // No dynamic eta color - use default stat-value color
         let etaColor = '';
 
-        if (hoursDiff > 0) {
-            const usedAmount = initialBalance - currentBalance;
-            const hourlyBurn = usedAmount / hoursDiff;
-            // 1% per hour = Fast, 5% per hour = Very Fast
-            const hourlyPercentBurn = (hourlyBurn / initialBalance) * 100;
+        // Need at least 2 records in the window to calculate rate
+        if (recentRecords.length >= 2) {
+            const windowFirstRecord = recentRecords[0];
+            const windowLastRecord = recentRecords[recentRecords.length - 1];
 
-            if (hourlyPercentBurn > 2) {
-                burnRateStatus = t('veryFast');
-                burnRateColor = 'text-red';
-            } else if (hourlyPercentBurn > 0.5) {
-                burnRateStatus = t('fast');
-                burnRateColor = 'text-orange';
-            }
+            const windowStartTime = new Date(windowFirstRecord.checked_at).getTime();
+            const windowEndTime = new Date(windowLastRecord.checked_at).getTime();
+            const windowHoursDiff = (windowEndTime - windowStartTime) / (1000 * 60 * 60);
 
-            // ETA Calculation
-            if (hourlyBurn > 0) {
-                const hoursLeft = currentBalance / hourlyBurn;
-                // If extremely long (> 90 days), keep 'Safe'
-                if (hoursLeft < 24 * 90) {
-                    const totalMinutes = Math.floor(hoursLeft * 60);
-                    const days = Math.floor(totalMinutes / (24 * 60));
-                    const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-                    const minutes = Math.floor(totalMinutes % 60);
+            if (windowHoursDiff > 0) {
+                const windowStartBalance = parseFloat(windowFirstRecord.balance);
+                const windowEndBalance = parseFloat(windowLastRecord.balance);
+                const recentUsedAmount = windowStartBalance - windowEndBalance;
+                const hourlyBurn = recentUsedAmount / windowHoursDiff;
 
-                    if (days > 0) {
-                        // e.g. ~3d5h
-                        etaText = `~${days}${t('days')}${hours}${t('hours')}`;
-                    } else if (hours > 0) {
-                        // e.g. ~2h4m
-                        etaText = `~${hours}${t('hours')}${minutes}${t('minutes')}`;
-                    } else {
-                        // e.g. ~45m
-                        etaText = `~${minutes}${t('minutes')}`;
+                // Calculate hourly percentage burn based on initial balance
+                const hourlyPercentBurn = (hourlyBurn / initialBalance) * 100;
+
+                if (hourlyPercentBurn > 2) {
+                    burnRateStatus = t('veryFast');
+                    burnRateColor = 'text-red';
+                } else if (hourlyPercentBurn > 0.5) {
+                    burnRateStatus = t('fast');
+                    burnRateColor = 'text-orange';
+                }
+
+                // ETA Calculation based on recent burn rate
+                if (hourlyBurn > 0) {
+                    const hoursLeft = currentBalance / hourlyBurn;
+                    // If extremely long (> 90 days), keep 'Safe'
+                    if (hoursLeft < 24 * 90) {
+                        const totalMinutes = Math.floor(hoursLeft * 60);
+                        const days = Math.floor(totalMinutes / (24 * 60));
+                        const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+                        const minutes = Math.floor(totalMinutes % 60);
+
+                        if (days > 0) {
+                            // e.g. ~3d5h
+                            etaText = `~${days}${t('days')}${hours}${t('hours')}`;
+                        } else if (hours > 0) {
+                            // e.g. ~2h4m
+                            etaText = `~${hours}${t('hours')}${minutes}${t('minutes')}`;
+                        } else {
+                            // e.g. ~45m
+                            etaText = `~${minutes}${t('minutes')}`;
+                        }
                     }
                 }
             }
+        } else {
+            // Fallback: if insufficient recent data, use minimal rate
+            // This handles cases where tracking just started or very sparse data
+            burnRateStatus = t('minimal');
+            burnRateColor = 'text-green';
         }
 
         // Update Time

@@ -281,48 +281,69 @@ function calculateStats(keyData) {
     const startTimeStr = keyData.initial_check_time || keyData.created_at;
     const endTimeStr = keyData.last_update || keyData.last_checked_at;
 
-    const startTime = new Date(startTimeStr).getTime();
-    const endTime = new Date(endTimeStr).getTime();
-    const hoursDiff = (endTime - startTime) / (1000 * 60 * 60);
-
+    // Burn Rate & ETA - Using Sliding Window (30 minutes)
     let burnRateStatus = t('minimal') || 'Minimal';
     let burnRateColor = 'text-green';
     let etaText = t('safe') || 'Safe';
 
-    if (hoursDiff > 0 && initialBalance > 0) {
-        const hourlyBurn = usedAmount / hoursDiff;
-        const hourlyPercentBurn = (hourlyBurn / initialBalance) * 100;
+    // Check if we have recent history from API (added in get_all_keys.php)
+    if (keyData.recent_history && Array.isArray(keyData.recent_history) && keyData.recent_history.length >= 2) {
+        const recentRecords = keyData.recent_history;
+        const windowFirstRecord = recentRecords[0];
+        const windowLastRecord = recentRecords[recentRecords.length - 1];
 
-        if (hourlyPercentBurn > 2) {
-            burnRateStatus = t('veryFast') || 'Very Fast';
-            burnRateColor = 'text-red';
-        } else if (hourlyPercentBurn > 0.5) {
-            burnRateStatus = t('fast') || 'Fast';
-            burnRateColor = 'text-orange';
-        }
+        const windowStartTime = new Date(windowFirstRecord.checked_at).getTime();
+        const windowEndTime = new Date(windowLastRecord.checked_at).getTime();
+        const windowHoursDiff = (windowEndTime - windowStartTime) / (1000 * 60 * 60);
 
-        // ETA Calculation
-        if (hourlyBurn > 0) {
-            const hoursLeft = currentBalance / hourlyBurn;
-            if (hoursLeft < 24 * 90) {
-                const totalMinutes = Math.floor(hoursLeft * 60);
-                const days = Math.floor(totalMinutes / (24 * 60));
-                const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-                const minutes = Math.floor(totalMinutes % 60);
+        if (windowHoursDiff > 0) {
+            const windowStartBalance = parseFloat(windowFirstRecord.balance);
+            const windowEndBalance = parseFloat(windowLastRecord.balance);
+            const recentUsedAmount = windowStartBalance - windowEndBalance;
+            const hourlyBurn = recentUsedAmount / windowHoursDiff;
 
-                const unitDays = t('days') || 'd';
-                const unitHours = t('hours') || 'h';
-                const unitMinutes = t('minutes') || 'm';
+            // Calculate hourly percentage burn based on initial balance
+            // If initial balance is 0 or missing, we can't calculate percentage effectively
+            if (initialBalance > 0) {
+                const hourlyPercentBurn = (hourlyBurn / initialBalance) * 100;
 
-                if (days > 0) {
-                    etaText = `~${days}${unitDays}${hours}${unitHours}`;
-                } else if (hours > 0) {
-                    etaText = `~${hours}${unitHours}${minutes}${unitMinutes}`;
-                } else {
-                    etaText = `~${minutes}${unitMinutes}`;
+                if (hourlyPercentBurn > 2) {
+                    burnRateStatus = t('veryFast') || 'Very Fast';
+                    burnRateColor = 'text-red';
+                } else if (hourlyPercentBurn > 0.5) {
+                    burnRateStatus = t('fast') || 'Fast';
+                    burnRateColor = 'text-orange';
+                }
+            }
+
+            // ETA Calculation
+            if (hourlyBurn > 0) {
+                const hoursLeft = currentBalance / hourlyBurn;
+                if (hoursLeft < 24 * 90) {
+                    const totalMinutes = Math.floor(hoursLeft * 60);
+                    const days = Math.floor(totalMinutes / (24 * 60));
+                    const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+                    const minutes = Math.floor(totalMinutes % 60);
+
+                    const unitDays = t('days') || 'd';
+                    const unitHours = t('hours') || 'h';
+                    const unitMinutes = t('minutes') || 'm';
+
+                    if (days > 0) {
+                        etaText = `~${days}${unitDays}${hours}${unitHours}`;
+                    } else if (hours > 0) {
+                        etaText = `~${hours}${unitHours}${minutes}${unitMinutes}`;
+                    } else {
+                        etaText = `~${minutes}${unitMinutes}`;
+                    }
                 }
             }
         }
+    } else {
+        // Fallback: If no recent history (e.g. data gap), verify if overall usage is zero
+        // This prevents showing static "safe" if we genuinely don't know, but "minimal" is safe bet for no data
+        burnRateStatus = t('minimal') || 'Minimal';
+        burnRateColor = 'text-green';
     }
 
     return {

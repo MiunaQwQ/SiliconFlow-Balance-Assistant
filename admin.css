@@ -1,5 +1,14 @@
 /* Admin Dashboard Specific Styles */
 
+/* Override global body styles to allow scrolling */
+body {
+    overflow-y: auto !important;
+    height: auto !important;
+    display: block !important;
+    padding-bottom: 40px;
+    /* Check this doesn't conflict */
+}
+
 /* Admin Container */
 .admin-container {
     width: 100%;
