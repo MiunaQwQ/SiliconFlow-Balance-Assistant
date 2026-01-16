@@ -29,6 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyChart = document.getElementById('historyChart');
     const balanceCanvas = document.getElementById('balanceCanvas');
 
+    // Model list elements
+    const modelList = document.getElementById('modelList');
+    const modelsLoading = document.getElementById('modelsLoading');
+    const modelsContent = document.getElementById('modelsContent');
+    const modelsEmpty = document.getElementById('modelsEmpty');
+
     checkBtn.addEventListener('click', async () => {
         const apiKey = apiKeyInput.value.trim();
 
@@ -62,6 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentApiKey = apiKey;
                 displayResult(data.data);
                 await checkTrackingStatus(apiKey, data.data);
+                // Fetch and display supported models
+                await fetchModels(apiKey);
             } else {
                 throw new Error(data.message || t('errorFormat'));
             }
@@ -321,8 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Update last update time and start countdown
                 lastUpdateTime = Date.now();
                 startCountdown();
-                // Sync heights after render
-                setTimeout(syncCardHeights, 100);
             } else {
                 historyChart.classList.add('hidden');
                 currentHistoryData = null;
@@ -589,45 +595,6 @@ document.addEventListener('DOMContentLoaded', () => {
         errorContainer.classList.add('hidden');
     }
 
-    function syncCardHeights() {
-        const card = document.querySelector('.card');
-        const sidePanel = document.querySelector('.side-panel');
-
-        // Reset height first
-        card.style.minHeight = 'auto';
-
-        if (window.innerWidth >= 1100 && !sidePanel.classList.contains('hidden')) {
-            // Get side panel height including its children (Stats + Chart)
-            // Note: side-panel is absolute, so its clientHeight should be accurate if content is there
-            const sideHeight = sidePanel.offsetHeight;
-            const cardHeight = card.offsetHeight;
-
-            // If side panel is taller, stretch card
-            if (sideHeight > cardHeight) {
-                card.style.minHeight = sideHeight + 'px';
-            }
-        }
-    }
-
-    // Call sync on window resize
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(syncCardHeights, 100);
-    });
-
-    // Call sync when chart shows/hides
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.target.id === 'historyChart' || mutation.target.classList.contains('side-panel')) {
-                setTimeout(syncCardHeights, 50); // Small delay for rendering
-            }
-        });
-    });
-
-    // Observer config
-    observer.observe(historyChart, { attributes: true, attributeFilter: ['class'] });
-
     function setLoading(isLoading) {
         if (isLoading) {
             checkBtn.classList.add('loading');
@@ -636,5 +603,177 @@ document.addEventListener('DOMContentLoaded', () => {
             checkBtn.classList.remove('loading');
             checkBtn.disabled = false;
         }
+    }
+
+    // ===== Model List Functions =====
+
+    async function fetchModels(apiKey) {
+        try {
+            // Show loading state
+            modelList.classList.remove('hidden');
+            modelsLoading.classList.remove('hidden');
+            modelsContent.classList.add('hidden');
+            modelsEmpty.classList.add('hidden');
+
+            const response = await fetch(`${BACKEND_URL}/get_models.php?api_key=${encodeURIComponent(apiKey)}`);
+            const result = await response.json();
+
+            if (result.success && result.data && result.data.length > 0) {
+                displayModels(result.data);
+            } else {
+                // Show empty state
+                modelsLoading.classList.add('hidden');
+                modelsEmpty.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Failed to fetch models:', error);
+            // Hide model list on error
+            modelList.classList.add('hidden');
+        }
+    }
+
+    function displayModels(models) {
+        // Hide loading, show content
+        modelsLoading.classList.add('hidden');
+        modelsContent.classList.remove('hidden');
+
+        // Clear previous content
+        modelsContent.innerHTML = '';
+
+        // Group models by type for better organization (optional - currently showing all)
+        models.forEach(model => {
+            const modelItem = document.createElement('div');
+            modelItem.className = 'model-item';
+            // Copy to clipboard on click
+            modelItem.onclick = () => {
+                copyToClipboard(model.id);
+            };
+
+            const modelName = document.createElement('div');
+            modelName.className = 'model-name';
+            modelName.textContent = model.id || 'Unknown Model';
+
+            const modelMeta = document.createElement('div');
+            modelMeta.className = 'model-meta';
+
+            // Detect model type from id (heuristic approach)
+            const typeInfo = detectModelType(model.id);
+
+            if (typeInfo.type) {
+                const badge = document.createElement('span');
+                badge.className = `model-badge badge-${typeInfo.type}`;
+                badge.textContent = t(`type${capitalize(typeInfo.type)}`) || typeInfo.type;
+                modelMeta.appendChild(badge);
+            }
+
+            // Add owner if available
+            if (model.owned_by) {
+                const owner = document.createElement('span');
+                owner.className = 'model-owner';
+                owner.textContent = model.owned_by;
+                modelMeta.appendChild(owner);
+            }
+
+            modelItem.appendChild(modelName);
+            modelItem.appendChild(modelMeta);
+            modelsContent.appendChild(modelItem);
+        });
+    }
+
+    async function copyToClipboard(text) {
+        // Fallback for non-secure contexts (HTTP) where navigator.clipboard is missing
+        if (!navigator.clipboard || !navigator.clipboard.writeText) {
+            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+
+                // Ensure it's not visible but part of DOM
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                textArea.style.top = "0";
+                document.body.appendChild(textArea);
+
+                textArea.focus();
+                textArea.select();
+
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                if (successful) {
+                    showToast(`${t('copied') || 'Copied'}: ${text}`);
+                } else {
+                    throw new Error('execCommand copy failed');
+                }
+            } catch (err) {
+                console.error('Fallback copy failed: ', err);
+                showToast(t('copyFailed') || 'Failed to copy', 'error');
+            }
+            return;
+        }
+
+        // Modern HTTPS approach
+        try {
+            await navigator.clipboard.writeText(text);
+            showToast(`${t('copied') || 'Copied'}: ${text}`);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            showToast(t('copyFailed') || 'Failed to copy', 'error');
+        }
+    }
+
+    let toastTimeout;
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        if (!toast || !toastMessage) return;
+
+        toastMessage.textContent = message;
+
+        // Optional: Change color based on type if needed, currently defaulting to green
+        if (type === 'error') {
+            toast.style.background = 'rgba(239, 68, 68, 0.95)'; // Red
+        } else {
+            toast.style.background = ''; // Reset to CSS default (Green)
+        }
+
+        toast.classList.add('show');
+
+        if (toastTimeout) clearTimeout(toastTimeout);
+
+        toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    function detectModelType(modelId) {
+        if (!modelId) return { type: null };
+
+        const id = modelId.toLowerCase();
+
+        // Image models
+        if (id.includes('flux') || id.includes('stable-diffusion') || id.includes('imagen') ||
+            id.includes('dalle') || id.includes('midjourney') || id.includes('kolors') ||
+            id.includes('wan') && id.includes('x')) {
+            return { type: 'image' };
+        }
+
+        // Video models
+        if (id.includes('video') || id.includes('kling') || id.includes('mochi')) {
+            return { type: 'video' };
+        }
+
+        // Audio models
+        if (id.includes('whisper') || id.includes('audio') || id.includes('speech') ||
+            id.includes('fish') || id.includes('cosyvoice') || id.includes('funaudio')) {
+            return { type: 'audio' };
+        }
+
+        // Default to text (LLMs, chat models, embeddings, etc.)
+        return { type: 'text' };
+    }
+
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 });

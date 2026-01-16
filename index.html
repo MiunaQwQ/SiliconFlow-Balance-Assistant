@@ -19,6 +19,31 @@
     </div>
 
     <div class="main-layout">
+        <!-- Left Panel for Models List -->
+        <div id="modelList" class="side-panel left-panel hidden">
+            <div class="models-card">
+                <h3 class="chart-title" data-i18n="supportedModels">Supported Models</h3>
+
+                <div id="modelsLoading" class="models-loading hidden">
+                    <div class="loader-spinner"></div>
+                    <span data-i18n="loading">Loading...</span>
+                </div>
+
+                <div id="modelsContent" class="models-list">
+                    <!-- Models will be populated here via JavaScript -->
+                </div>
+
+                <div id="modelsEmpty" class="models-empty hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    <span data-i18n="noModels">No models available</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Card -->
         <div class="card">
             <div class="lang-switch">
@@ -186,6 +211,14 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <svg xmlns="http://www.w3.org/2000/svg" class="toast-icon" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <span id="toastMessage">Notification</span>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>

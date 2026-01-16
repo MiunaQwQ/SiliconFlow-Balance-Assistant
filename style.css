@@ -550,31 +550,130 @@ button:disabled {
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Desktop Absolute Positioning (> 1100px) */
-@media (min-width: 1100px) {
+/* Desktop Layout (> 1100px) */
+/* Desktop Layout (> 1280px) */
+@media (min-width: 1280px) {
     .main-layout {
-        display: block;
-        /* Allow absolute child relative to this container */
-        min-height: 100vh;
-        /* Ensure container has height context if needed */
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        /* 3 Columns: Flexible - Fixed - Flexible */
+        align-items: center;
+        /* Default: Center vertically (Idle state) */
+        gap: 24px;
+
+        /* Full height layout management */
+        height: 100%;
+        width: 100%;
+        max-width: 100%;
+        /* Allow full width for grid to work */
+
+        /* Remove old padding hacks */
+        padding: 20px;
     }
 
-    .side-panel {
-        position: absolute;
-        top: 20px;
-        /* Align with top padding */
-        left: 50%;
-        margin-left: 234px;
-        /* 420px/2 (210) + 24px gap */
-        width: 580px;
-        /* Fixed width on desktop */
+    /* 
+       When any side panel is visible (Dashboard state), 
+       switch to stretch to make all columns full height 
+    */
+    .main-layout:has(.side-panel:not(.hidden)) {
+        align-items: stretch;
     }
-}
 
-.side-panel.hidden {
-    display: none;
-    opacity: 0;
-    transform: translateX(-20px);
+    /* Shared layout properties */
+    .card,
+    .side-panel.left-panel,
+    .side-panel:not(.left-panel) {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+
+        /* Reset positioning */
+        position: relative;
+        transform: none;
+        opacity: 1;
+
+        /* Ensure height management */
+        height: auto;
+        min-height: 0;
+        max-height: 100%;
+    }
+
+    /* Left Panel: In first column, pushed right */
+    .side-panel.left-panel {
+        grid-column: 1;
+        justify-self: end;
+        width: 400px;
+    }
+
+    /* Main Card: In center column */
+    .card {
+        grid-column: 2;
+        width: 400px;
+    }
+
+    /* Right Panel: In third column, pushed left */
+    .side-panel:not(.left-panel) {
+        grid-column: 3;
+        justify-self: start;
+        width: 500px;
+    }
+
+    /* Specific overrides */
+
+    /* Ensure scrolling works in panels */
+    .models-list {
+        flex: 1;
+        overflow-y: auto;
+        /* Custom scrollbar styling matches global */
+    }
+
+    .chart-wrapper {
+        flex: 1;
+        /* Allow chart to expand to fill space */
+    }
+
+    .card {
+        z-index: 10;
+        overflow-y: auto;
+        /* Allow scrolling in main card if content overflows */
+    }
+
+    /* Content containers */
+    /* Content containers */
+    .models-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .stats-card,
+    .chart-wrapper {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .stats-card {
+        flex: 0 0 auto;
+        /* Don't shrink/grow, size to content */
+    }
+
+    .chart-wrapper {
+        flex: 1;
+        /* Fill remaining vertical space */
+        height: auto;
+        /* Allow flex to control height */
+    }
+
+    .chart-wrapper canvas {
+        flex: 1;
+    }
+
+    /* Hide panels if toggled off */
+    .side-panel.hidden {
+        display: none;
+    }
 }
 
 /* Stats Card */
@@ -807,7 +906,11 @@ button:disabled {
 
 .canvas-container {
     position: relative;
-    height: 300px;
+    /* height: 300px;  <-- Removed fixed height */
+    flex: 1;
+    /* Allow it to fill remaining space */
+    min-height: 0;
+    /* Critical for Chart.js in flex containers */
     width: 100%;
 }
 
@@ -839,4 +942,197 @@ button:disabled {
     #balanceCanvas {
         max-height: 250px;
     }
+}
+
+/* Models List Styles */
+.models-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.models-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-top: 16px;
+    padding-right: 8px;
+}
+
+/* Custom scrollbar for models list */
+.models-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.models-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.models-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.models-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.model-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.model-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent-color);
+    transform: translateX(4px);
+}
+
+.model-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 6px;
+    word-break: break-word;
+}
+
+.model-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.model-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-text {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+}
+
+.badge-image {
+    background: linear-gradient(135deg, #ec4899, #f43f5e);
+    color: #fff;
+}
+
+.badge-audio {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+}
+
+.badge-video {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+}
+
+.model-owner {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+/* Loading State */
+.models-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+}
+
+.loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--accent-color);
+    animation: spin 0.8s linear infinite;
+}
+
+.models-loading span {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* Empty State */
+.models-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 12px;
+    color: var(--text-secondary);
+}
+
+.empty-icon {
+    width: 48px;
+    height: 48px;
+    opacity: 0.5;
+}
+
+.models-empty span {
+    font-size: 14px;
+}
+
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(16, 185, 129, 0.95);
+    /* Success Green */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 50px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    z-index: 2000;
+    font-weight: 500;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    /* Hidden State */
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast-icon {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.5;
 }
