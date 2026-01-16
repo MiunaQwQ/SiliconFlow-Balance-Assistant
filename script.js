@@ -637,6 +637,12 @@ document.addEventListener('DOMContentLoaded', () => {
         modelsLoading.classList.add('hidden');
         modelsContent.classList.remove('hidden');
 
+        // Update count
+        const modelCountEl = document.getElementById('modelCount');
+        if (modelCountEl) {
+            modelCountEl.textContent = models.length;
+        }
+
         // Clear previous content
         modelsContent.innerHTML = '';
 

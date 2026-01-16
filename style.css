@@ -1139,4 +1139,28 @@ button:disabled {
     width: 18px;
     height: 18px;
     stroke-width: 2.5;
+}/* Models Header */
+.models-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+    /* Let details handle spacing if needed, but previously h3 had inherent margin or padding */
+    padding-right: 4px;
+    /* Slight offset for visual balance */
+}
+
+.models-header .chart-title {
+    margin-bottom: 0;
+}
+
+.model-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    border: 1px solid var(--glass-border);
 }
