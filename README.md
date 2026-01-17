@@ -9,15 +9,19 @@ A beautiful SiliconFlow API balance query assistant with balance tracking and hi
 ### 核心功能 / Core Features
 - 🔍 **实时余额查询** - 快速查询 SiliconFlow API Key 的余额信息
 - 📊 **余额跟踪** - 勾选跟踪 API Key,自动记录余额变化历史
-- 📈 **数据可视化** - 折线图展示余额趋势,支持最多 90 天历史数据
+- 📈 **数据可视化** - ECharts 面积图展示余额趋势,支持最多 90 天历史数据
 - ⏰ **自动批量查询** - 支持计划任务定时批量查询所有跟踪的 API Key
+- 🔄 **智能刷新** - 倒计时自动刷新,数据来源优化为本地数据库
+- 🎯 **自动取消跟踪** - 余额归零时自动停止跟踪,节省系统资源
 - 🌐 **多语言支持** - 简体中文 / 繁体中文 / English / 日本語
 
 ### 技术特性 / Technical Features
 - 🔐 **安全加密** - AES-256-CBC 加密存储 API Key,SHA256 哈希去重
 - 🎨 **现代设计** - Glassmorphism 毛玻璃设计,渐变色和流畅动画
 - 📱 **响应式布局** - 完美支持桌面端和移动端
-- 🚀 **高性能** - 使用 Chart.js 实现高性能数据可视化
+- 🚀 **高性能** - 使用 ECharts 实现高性能数据可视化
+- 🎚️ **数据缩放** - 支持时间范围选择和数据缩放功能
+- 📊 **智能聚焦** - 默认聚焦最近 2 小时数据,可查看全部 7 天历史
 - 🛡️ **SQL 注入防护** - 使用预处理语句保护数据库安全
 
 ## 🚀 快速开始 / Quick Start
@@ -161,15 +165,19 @@ crontab -e
 
 ### 查看历史数据 / View Historical Data
 
-1. 对于已跟踪的 API Key,计划任务会自动记录余额
-2. 再次查询该 API Key 时,会显示余额变化折线图
-3. 支持查看最近 7 天 (默认) 到 90 天的历史数据
+1. 对于已跟踪或曾经跟踪过的 API Key,系统会保留历史数据
+2. 再次查询该 API Key 时,会显示余额变化面积图
+3. 支持查看最近 7 天的历史数据,默认聚焦最近 2 小时
+4. 使用底部滑块可以调整显示的时间范围
+5. 即使跟踪已停止,历史数据依然可以查看
 
 ### 移除跟踪 / Remove Tracking
 
 1. 查询已跟踪的 API Key
 2. 取消勾选 "跟踪此 API Key" 复选框
 3. 系统将停止跟踪并删除该 API Key (历史数据保留)
+
+**注意**: 当 API Key 余额归零时,系统会自动取消跟踪以节省资源。
 
 ## 📁 项目结构 / Project Structure
 
@@ -179,7 +187,8 @@ SiliconFlow-Balance-Assistant/
 │   ├── api/                   # API 接口 / API endpoints
 │   │   ├── track_key.php      # 跟踪管理 API / Tracking management
 │   │   ├── batch_check.php    # 批量查询 API / Batch checking
-│   │   └── get_history.php    # 历史数据 API / Historical data
+│   │   ├── get_history.php    # 历史数据 API / Historical data
+│   │   └── get_latest_balance.php  # 最新余额 API / Latest balance
 │   ├── database/              # 数据库 / Database
 │   │   └── schema.sql         # 数据库架构 / Database schema
 │   ├── logs/                  # 日志目录 / Logs directory
@@ -232,6 +241,14 @@ GET /backend/api/get_history.php?api_key=sk-xxxxx&days=7
 参数 / Parameters:
 - `api_key` (必需): 要查询的 API Key
 - `days` (可选): 查询天数 (默认: 7, 最大: 90)
+- `hours` (可选): 查询小时数 (优先于 days 参数)
+
+### 4. 获取最新余额 / Get Latest Balance
+```bash
+GET /backend/api/get_latest_balance.php?api_key=sk-xxxxx
+```
+
+此端点从数据库获取最新余额记录,用于前端自动刷新。
 
 完整 API 文档请参考 [backend/README.md](backend/README.md)
 
@@ -257,7 +274,7 @@ GET /backend/api/get_history.php?api_key=sk-xxxxx&days=7
 ### 前端 / Frontend
 - **HTML5 + CSS3** - 现代 Web 标准
 - **Vanilla JavaScript** - 无框架依赖
-- **Chart.js 4.4.1** - 数据可视化
+- **ECharts 5.4.3** - 数据可视化库
 - **Inter Font** - 现代字体
 
 ### 后端 / Backend
@@ -305,9 +322,9 @@ curl http://localhost/backend/api/batch_check.php
 - 查看浏览器控制台是否有错误
 
 **Q: 折线图不显示?**
-- 确认已启用跟踪
-- 等待计划任务执行至少一次
-- 检查是否有历史数据记录
+- 确认 API Key 有历史数据记录
+- 不需要正在跟踪,只要有历史数据即可
+- 检查浏览器控制台是否有错误
 
 **Q: 批量查询不工作?**
 - 确认计划任务已正确配置

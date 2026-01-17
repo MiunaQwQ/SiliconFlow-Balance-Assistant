@@ -2,7 +2,7 @@
 
 ## Overview
 
-This backend provides APIs for tracking SiliconFlow API keys and recording their balance history.
+This backend provides APIs for tracking SiliconFlow API keys and recording their balance history. Features include automated batch checking, smart auto-disable when balance reaches zero, and flexible historical data queries.
 
 ## Environment Requirements
 
@@ -127,9 +127,13 @@ Response:
     "total": 5,
     "success": 4,
     "failed": 1,
+    "auto_disabled": 1,
     "details": [...]
   }
 }
+```
+
+**Auto-Disable Feature**: When balance reaches zero or negative, the tracked key will be automatically disabled (`is_active = 0`) to save system resources.
 ```
 
 ### 3. Get History
@@ -143,6 +147,7 @@ GET /backend/api/get_history.php?api_key=sk-xxxxx&days=7
 Parameters:
 - `api_key` (required): The API key to query
 - `days` (optional): Number of days to retrieve (default: 7, max: 90)
+- `hours` (optional): Number of hours to retrieve (takes priority over days)
 
 Response:
 ```json
@@ -152,22 +157,48 @@ Response:
   "data": {
     "is_tracked": true,
     "tracked_key_id": 1,
-    "days": 7,
-    "count": 168,
+    "time_unit": "hours",
+    "time_value": 2,
+    "count": 24,
     "history": [
       {
         "balance": "98.50",
         "status": "active",
-        "checked_at": "2026-01-16 01:00:00"
-      },
-      {
-        "balance": "97.20",
-        "status": "active",
-        "checked_at": "2026-01-16 02:00:00"
+        "checked_at": "2026-01-17 01:00:00"
       }
     ]
   }
 }
+```
+
+**Note**: History will be displayed even if tracking is currently disabled, as long as historical records exist.
+
+### 4. Get Latest Balance
+
+**Endpoint**: `GET /backend/api/get_latest_balance.php`
+
+```bash
+GET /backend/api/get_latest_balance.php?api_key=sk-xxxxx
+```
+
+Parameters:
+- `api_key` (required): The API key to query
+
+Response:
+```json
+{
+  "success": true,
+  "message": "Latest balance retrieved successfully",
+  "data": {
+    "balance": 98.50,
+    "status": "active",
+    "checked_at": "2026-01-17 14:30:00",
+    "user_id": "123"
+  }
+}
+```
+
+**Purpose**: This endpoint retrieves the most recent balance record from the database, used by the frontend for automatic refresh without querying the SiliconFlow API directly.
 ```
 
 ## Scheduled Task Configuration
@@ -240,13 +271,26 @@ curl -X POST http://localhost/backend/api/track_key.php?action=add \
 ```
 backend/
 ├── api/
-│   ├── track_key.php      # Tracking management
-│   ├── batch_check.php    # Scheduled batch checking
-│   └── get_history.php    # Historical data retrieval
+│   ├── track_key.php          # Tracking management
+│   ├── batch_check.php        # Scheduled batch checking (with auto-disable)
+│   ├── get_history.php        # Historical data retrieval
+│   └── get_latest_balance.php # Latest balance from DB
 ├── database/
-│   └── schema.sql         # Database schema
-├── logs/                  # Application logs
-├── config.php            # Configuration & utilities
-├── db.php                # Database connection class
-└── README.md             # This file
+│   └── schema.sql             # Database schema
+├── logs/                      # Application logs
+├── config.php                 # Configuration & utilities
+├── db.php                     # Database connection class
+└── README.md                  # This file
 ```
+
+## Recent Updates
+
+### Auto-Disable Tracking (v1.1.0)
+- Automatically disables tracking when balance reaches zero to save resources
+- Implemented in `batch_check.php`
+- Logs auto-disable actions for audit purposes
+
+### Enhanced Data Retrieval
+- Added `get_latest_balance.php` for efficient database-based refresh
+- Enhanced `get_history.php` to support hour-based filtering
+- History display no longer requires active tracking
