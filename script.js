@@ -312,7 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                hour12: false
             });
 
             const useButton = document.createElement('button');
@@ -917,7 +918,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update Time
         const updateDate = new Date(latestRecord.checked_at);
-        statsUpdateTime.textContent = updateDate.toLocaleTimeString(getCurrentLanguage(), { hour: '2-digit', minute: '2-digit' });
+        statsUpdateTime.textContent = updateDate.toLocaleTimeString(getCurrentLanguage(), { hour: '2-digit', minute: '2-digit', hour12: false });
 
         // Total Used
         const usedAmount = initialBalance - currentBalance;
@@ -962,7 +963,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 month: '2-digit',
                 day: '2-digit',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                hour12: false
             });
         });
 
