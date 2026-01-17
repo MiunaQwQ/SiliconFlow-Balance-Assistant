@@ -114,9 +114,15 @@ try {
 
     Logger::info("History view mode: Retrieved " . count($matchedKeys) . " matched keys from " . count($historyKeys) . " history keys");
 
+    // Get last batch check time for countdown synchronization
+    $batchCheckTime = $db->queryOne(
+        "SELECT status_value as last_batch_check FROM system_status WHERE status_key = 'last_batch_check'"
+    );
+
     Response::success([
         'keys' => $matchedKeys,
-        'count' => count($matchedKeys)
+        'count' => count($matchedKeys),
+        'last_batch_check' => $batchCheckTime['last_batch_check'] ?? null
     ], 'Keys retrieved successfully');
 
 } catch (Exception $e) {

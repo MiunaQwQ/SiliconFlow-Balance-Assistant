@@ -102,6 +102,19 @@ try {
     
     Logger::info("Batch check completed. Success: {$results['success']}, Failed: {$results['failed']}");
     
+    // Record batch check execution time for countdown synchronization
+    try {
+        $db->execute(
+            "INSERT INTO system_status (status_key, status_value, updated_at) 
+             VALUES ('last_batch_check', NOW(), NOW())
+             ON DUPLICATE KEY UPDATE status_value = NOW(), updated_at = NOW()"
+        );
+        Logger::info("Recorded batch check execution time");
+    } catch (Exception $e) {
+        Logger::error("Failed to record batch check time: " . $e->getMessage());
+        // Don't fail the entire batch if this fails
+    }
+    
     Response::success($results, 'Batch check completed');
     
 } catch (Exception $e) {

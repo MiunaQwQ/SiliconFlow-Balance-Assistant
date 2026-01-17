@@ -52,3 +52,18 @@ SELECT
 FROM tracked_keys tk
 LEFT JOIN balance_history bh ON tk.id = bh.tracked_key_id
 GROUP BY tk.id;
+
+-- Table: system_status
+-- Stores system-level metadata including batch check execution time
+CREATE TABLE IF NOT EXISTS system_status (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    status_key VARCHAR(50) UNIQUE NOT NULL,
+    status_value TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_status_key (status_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Insert initial record for batch check time
+INSERT INTO system_status (status_key, status_value, updated_at) 
+VALUES ('last_batch_check', NULL, NULL)
+ON DUPLICATE KEY UPDATE status_key=status_key;

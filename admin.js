@@ -167,6 +167,9 @@ async function loadAllKeys() {
 
         keysData = result.data.keys || [];
 
+        // Get batch check time from server response
+        const batchCheckTime = result.data.last_batch_check;
+
         // Hide loading
         loadingState.classList.add('hidden');
 
@@ -180,30 +183,17 @@ async function loadAllKeys() {
         renderAllKeys();
         cardsGrid.classList.remove('hidden');
 
-        // Start countdown timer
-        // Calculate latest update time from keys to sync countdown
-        let maxTime = 0;
-        keysData.forEach(key => {
-            // Check both fields just in case
-            const time = new Date(key.last_update || key.last_checked_at).getTime();
-            if (!isNaN(time) && time > maxTime) {
-                maxTime = time;
-            }
-        });
-
-        // Determine base time for countdown
-        // If we have valid server data, use it. Otherwise fall back to now.
-        const targetTime = maxTime > 0 ? maxTime : Date.now();
-        const nextRefresh = targetTime + REFRESH_INTERVAL;
-
-        // Safety check: if data is stale (next refresh should have happened already),
-        // don't enter a refresh loop. Instead, wait for the next full interval from now.
-        // Allow a small buffer (e.g. 10 seconds) for network latency
-        if (nextRefresh <= (Date.now() + 10000)) {
-            console.warn('Server data appears stale or out of sync. Defaulting to 5m countdown from now.');
-            lastRefreshTime = Date.now();
+        // Start countdown based on batch check time (not individual key times)
+        // This ensures countdown stays synced with actual batch schedule,
+        // even when users manually query and save keys
+        if (batchCheckTime) {
+            lastRefreshTime = new Date(batchCheckTime).getTime();
+            console.log('Using batch check time for countdown:', batchCheckTime);
         } else {
-            lastRefreshTime = targetTime;
+            // Fallback: Use current time if no batch check recorded yet
+            // This happens on first run before any batch check has executed
+            lastRefreshTime = Date.now();
+            console.warn('No batch check time available, using current time. Countdown may be inaccurate until first batch check runs.');
         }
 
         startCountdown();
@@ -670,8 +660,18 @@ function updateCountdown() {
     const elapsed = now - lastRefreshTime;
     const remaining = REFRESH_INTERVAL - elapsed;
 
+    // Debug logging
+    console.log('Countdown Debug:', {
+        lastRefreshTime: new Date(lastRefreshTime).toISOString(),
+        now: new Date(now).toISOString(),
+        elapsed: Math.floor(elapsed / 1000) + 's',
+        remaining: Math.floor(remaining / 1000) + 's',
+        REFRESH_INTERVAL: REFRESH_INTERVAL / 1000 + 's'
+    });
+
     if (remaining <= 0) {
         // Time to refresh
+        console.log('Countdown reached zero, triggering refresh...');
         loadAllKeys();
         return;
     }

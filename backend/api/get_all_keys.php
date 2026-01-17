@@ -98,9 +98,15 @@ try {
     
     Logger::info("Retrieved " . count($processedKeys) . " tracked keys");
     
+    // Get last batch check time for countdown synchronization
+    $batchCheckTime = $db->queryOne(
+        "SELECT status_value as last_batch_check FROM system_status WHERE status_key = 'last_batch_check'"
+    );
+    
     Response::success([
         'count' => count($processedKeys),
-        'keys' => $processedKeys
+        'keys' => $processedKeys,
+        'last_batch_check' => $batchCheckTime['last_batch_check'] ?? null
     ], 'All tracked keys retrieved successfully');
     
 } catch (Exception $e) {
