@@ -51,11 +51,20 @@ try {
                     [$trackedKeyId, $balance['balance'], $balance['status']]
                 );
                 
-                // Update last_checked_at
-                $db->execute(
-                    'UPDATE tracked_keys SET last_checked_at = NOW() WHERE id = ?',
-                    [$trackedKeyId]
-                );
+                // Auto-disable tracking if balance is zero or negative
+                if ($balance['balance'] <= 0) {
+                    $db->execute(
+                        'UPDATE tracked_keys SET is_active = 0, last_checked_at = NOW() WHERE id = ?',
+                        [$trackedKeyId]
+                    );
+                    Logger::info("Auto-disabled tracking for tracked_key_id: {$trackedKeyId} (balance is zero)");
+                } else {
+                    // Update last_checked_at normally
+                    $db->execute(
+                        'UPDATE tracked_keys SET last_checked_at = NOW() WHERE id = ?',
+                        [$trackedKeyId]
+                    );
+                }
                 
                 $results['success']++;
                 $results['details'][] = [
