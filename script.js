@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${BACKEND_URL}/get_history.php?api_key=${encodeURIComponent(apiKey)}&days=${days}`);
             const result = await response.json();
 
-            if (result.success && result.data.is_tracked && result.data.history.length > 0) {
+            if (result.success && result.data.history.length > 0) {
                 currentHistoryData = result.data; // Store for re-rendering
                 renderBalanceChart(result.data.history);
                 updateStatsCard(result.data, apiKey);
