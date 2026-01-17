@@ -806,7 +806,7 @@ button:disabled {
         opacity: 1;
 
         /* Ensure height management */
-        height: auto;
+        height: 100%;
         min-height: 0;
         max-height: 100%;
     }
@@ -883,8 +883,7 @@ button:disabled {
     .chart-wrapper {
         flex: 1;
         /* Fill remaining vertical space */
-        height: auto;
-        /* Allow flex to control height */
+        height: 100%;
     }
 
     .chart-wrapper canvas {
@@ -1071,6 +1070,8 @@ button:disabled {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     height: 100%;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .chart-title {
@@ -1135,7 +1136,7 @@ button:disabled {
     width: 100%;
 }
 
-#balanceCanvas {
+#balanceChart {
     width: 100% !important;
     height: 100% !important;
 }

@@ -2,7 +2,7 @@
 const BACKEND_URL = window.location.origin + '/backend/api';
 
 let currentApiKey = null;
-let balanceChart = null;
+let balanceChartInstance = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Language
@@ -771,101 +771,213 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBalanceChart(historyData) {
-        if (balanceChart) {
-            balanceChart.destroy();
+        // Dispose previous chart instance
+        if (balanceChartInstance) {
+            balanceChartInstance.dispose();
         }
 
-        const ctx = balanceCanvas.getContext('2d');
+        // Get container element
+        const chartDom = document.getElementById('balanceChart');
+        if (!chartDom) {
+            console.error('Chart container not found');
+            return;
+        }
+
+        // Initialize ECharts instance
+        balanceChartInstance = echarts.init(chartDom);
 
         // Prepare data
-        const labels = historyData.map(item => {
+        const xAxisData = historyData.map(item => {
             const date = new Date(item.checked_at);
             return date.toLocaleString(getCurrentLanguage(), {
-                month: 'short',
-                day: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
                 hour: '2-digit',
                 minute: '2-digit'
             });
         });
 
-        const balances = historyData.map(item => parseFloat(item.balance));
+        const seriesData = historyData.map(item => parseFloat(item.balance));
 
-        // Create gradient
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(102, 126, 234, 0.4)');
-        gradient.addColorStop(1, 'rgba(102, 126, 234, 0.0)');
+        // Calculate dataZoom range to focus on last 2 hours
+        let dataZoomStart = 0;
+        if (historyData.length > 1) {
+            const latestTime = new Date(historyData[historyData.length - 1].checked_at).getTime();
+            const twoHoursAgo = latestTime - (2 * 60 * 60 * 1000); // 2 hours in milliseconds
 
-        balanceChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: t('balance') || 'Balance',
-                    data: balances,
-                    borderColor: '#667eea',
-                    backgroundColor: gradient,
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#667eea',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
-                }]
+            // Find the index where data is within last 2 hours
+            let startIndex = historyData.length - 1;
+            for (let i = historyData.length - 1; i >= 0; i--) {
+                const itemTime = new Date(historyData[i].checked_at).getTime();
+                if (itemTime < twoHoursAgo) {
+                    startIndex = i + 1;
+                    break;
+                }
+                if (i === 0) {
+                    startIndex = 0;
+                }
+            }
+
+            // Calculate percentage
+            dataZoomStart = Math.max(0, (startIndex / historyData.length) * 100);
+        }
+
+        // ECharts configuration (area chart style)
+        const option = {
+            backgroundColor: 'transparent',
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                borderColor: '#667eea',
+                borderWidth: 1,
+                textStyle: {
+                    color: '#fff'
+                },
+                formatter: function (params) {
+                    if (params && params.length > 0) {
+                        const value = params[0].value;
+                        const timeLabel = params[0].name;
+                        return `${timeLabel}<br/>${t('balance')}: ¥${value.toFixed(2)}`;
+                    }
+                    return '';
+                }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '15%',  // Increased for dataZoom slider
+                top: '10%',
+                containLabel: true
+            },
+            dataZoom: [
+                {
+                    type: 'slider',
+                    show: true,
+                    xAxisIndex: [0],
+                    start: dataZoomStart,
+                    end: 100,
+                    height: 30,
+                    bottom: 10,
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    fillerColor: 'rgba(102, 126, 234, 0.2)',
+                    handleStyle: {
+                        color: '#667eea',
+                        borderColor: '#667eea'
                     },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        borderColor: '#667eea',
-                        borderWidth: 1,
-                        padding: 12,
-                        displayColors: false,
-                        callbacks: {
-                            label: function (context) {
-                                return `${t('balance') || 'Balance'}: ¥${context.parsed.y.toFixed(2)}`;
+                    textStyle: {
+                        color: 'rgba(255, 255, 255, 0.6)'
+                    },
+                    dataBackground: {
+                        lineStyle: {
+                            color: '#667eea',
+                            width: 1
+                        },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [{
+                                    offset: 0,
+                                    color: 'rgba(102, 126, 234, 0.3)'
+                                }, {
+                                    offset: 1,
+                                    color: 'rgba(102, 126, 234, 0.1)'
+                                }]
                             }
                         }
                     }
                 },
-                scales: {
-                    x: {
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.05)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            maxRotation: 45,
-                            minRotation: 45,
-                            font: {
-                                size: 10
-                            }
-                        }
-                    },
-                    y: {
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.05)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            callback: function (value) {
-                                return '¥' + value.toFixed(2);
-                            }
-                        }
-                    }
+                {
+                    type: 'inside',
+                    xAxisIndex: [0],
+                    start: dataZoomStart,
+                    end: 100
                 }
+            ],
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: xAxisData,
+                axisLine: {
+                    lineStyle: {
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    }
+                },
+                axisLabel: {
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    rotate: 45,
+                    fontSize: 10
+                }
+            },
+            yAxis: {
+                type: 'value',
+                axisLine: {
+                    lineStyle: {
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    }
+                },
+                axisLabel: {
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    formatter: '¥{value}'
+                }
+            },
+            series: [{
+                name: t('balance'),
+                type: 'line',
+                smooth: true,
+                showSymbol: false,
+                lineStyle: {
+                    color: '#667eea',
+                    width: 2
+                },
+                areaStyle: {
+                    color: {
+                        type: 'linear',
+                        x: 0,
+                        y: 0,
+                        x2: 0,
+                        y2: 1,
+                        colorStops: [{
+                            offset: 0,
+                            color: 'rgba(102, 126, 234, 0.4)'
+                        }, {
+                            offset: 1,
+                            color: 'rgba(102, 126, 234, 0.0)'
+                        }]
+                    }
+                },
+                data: seriesData
+            }]
+        };
+
+        balanceChartInstance.setOption(option);
+
+        // Handle window resize
+        const resizeHandler = () => {
+            if (balanceChartInstance) {
+                balanceChartInstance.resize();
             }
-        });
+        };
+
+        // Remove old listener if exists
+        window.removeEventListener('resize', resizeHandler);
+        // Add new listener
+        window.addEventListener('resize', resizeHandler);
+
+        // Force resize after a brief delay to ensure container has sized correctly
+        setTimeout(() => {
+            if (balanceChartInstance) {
+                balanceChartInstance.resize();
+            }
+        }, 100);
     }
 
     function getCurrentLanguage() {
