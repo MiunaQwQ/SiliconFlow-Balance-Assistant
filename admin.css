@@ -24,7 +24,13 @@ body {
 
 /* Header */
 .admin-header {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
+}
+
+/* Force lang-switch to flow with header items */
+.admin-header .lang-switch {
+    width: auto;
+    margin-bottom: 0;
 }
 
 .header-content {
@@ -71,7 +77,7 @@ body {
     font-size: 32px;
     font-weight: 700;
     color: #ffffff;
-    margin-bottom: 4px;
+    margin-bottom: 0;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 

@@ -25,9 +25,9 @@ const translations = {
         'historyHint': 'Save query records for future reference',
         'balanceHistory': 'Balance History',
         'balance': 'Balance',
-        'balance': 'Balance',
+
         'trackingError': 'Failed to update tracking status',
-        'userStatusTitle': 'User Status',
+
         'remaining': 'Remaining',
         'used': 'Used',
         'updateTime': 'Update Time',
@@ -40,7 +40,8 @@ const translations = {
         'lessThan24h': '< 24h',
         'lessThan3d': '< 3d',
         'sessionUsed': 'Total Used',
-        'trackedKey': 'Key Status',
+
+        'keyStatus': 'Key Status',
         'days': 'd',
         'hours': 'h',
         'minutes': 'm',
@@ -59,7 +60,7 @@ const translations = {
         'subTypeTextToImage': 'Text-to-Image',
         'subTypeImageToImage': 'Image-to-Image',
         'subTypeSpeechToText': 'Speech-to-Text',
-        'subTypeSpeechToText': 'Speech-to-Text',
+
         'subTypeTextToVideo': 'Text-to-Video',
         'copied': 'Copied',
         'copyFailed': 'Failed to copy',
@@ -69,7 +70,6 @@ const translations = {
         'saveToServer': 'Save to Server',
         'saveToServerHint': 'Save this record to the server for tracking',
         'adminTitle': 'API Keys Dashboard',
-        'adminSubtitle': 'Manage and monitor all tracked keys',
         'backToMain': 'Back',
         'noTrackedKeys': 'No keys are being tracked',
         'startTracking': 'Start tracking keys in the main page',
@@ -81,7 +81,11 @@ const translations = {
         'accountStatus': 'Status',
         'currentBalance': 'Balance',
         'statusUnknown': 'Unknown',
-        'dashboard': 'Dashboard'
+        'dashboard': 'Dashboard',
+        'justNow': 'Just now',
+        'minutesAgo': '{0}m ago',
+        'hoursAgo': '{0}h ago',
+        'daysAgo': '{0}d ago'
     },
     'zh-CN': {
         'title': 'SiliconFlow 余额助手',
@@ -109,9 +113,9 @@ const translations = {
         'historyHint': '保存查询记录以便日后参考',
         'balanceHistory': '余额历史',
         'balance': '余额',
-        'balance': '余额',
+
         'trackingError': '更新跟踪状态失败',
-        'userStatusTitle': '用户状态',
+
         'remaining': '剩余',
         'used': '已用',
         'updateTime': '更新时间',
@@ -124,7 +128,8 @@ const translations = {
         'lessThan24h': '< 24小时',
         'lessThan3d': '< 3天',
         'sessionUsed': '累计消耗',
-        'trackedKey': 'Key 状态',
+
+        'keyStatus': 'Key 状态',
         'days': '天',
         'hours': '小时',
         'minutes': '分',
@@ -152,7 +157,6 @@ const translations = {
         'saveToServer': '保存到服务器',
         'saveToServerHint': '将此次记录保存到服务器进行跟踪',
         'adminTitle': 'API Keys 控制台',
-        'adminSubtitle': '管理和监控所有跟踪的密钥',
         'backToMain': '返回',
         'noTrackedKeys': '暂无跟踪的密钥',
         'startTracking': '在主页面开始跟踪密钥',
@@ -164,7 +168,11 @@ const translations = {
         'accountStatus': '状态',
         'currentBalance': '余额',
         'statusUnknown': '未知',
-        'dashboard': '控制台'
+        'dashboard': '控制台',
+        'justNow': '刚刚',
+        'minutesAgo': '{0}分钟前',
+        'hoursAgo': '{0}小时前',
+        'daysAgo': '{0}天前'
     },
     'zh-TW': {
         'title': 'SiliconFlow 餘額助手',
@@ -192,9 +200,9 @@ const translations = {
         'historyHint': '保存查詢記錄以便日後參考',
         'balanceHistory': '餘額歷史',
         'balance': '餘額',
-        'balance': '餘額',
+
         'trackingError': '更新追蹤狀態失敗',
-        'userStatusTitle': '用戶狀態',
+
         'remaining': '剩餘',
         'used': '已用',
         'updateTime': '更新時間',
@@ -207,7 +215,8 @@ const translations = {
         'lessThan24h': '< 24小時',
         'lessThan3d': '< 3天',
         'sessionUsed': '累計消耗',
-        'trackedKey': 'Key 狀態',
+
+        'keyStatus': 'Key 狀態',
         'days': '天',
         'hours': ' 小時',
         'minutes': ' 分',
@@ -226,7 +235,7 @@ const translations = {
         'subTypeTextToImage': '文生圖',
         'subTypeImageToImage': '圖生圖',
         'subTypeSpeechToText': '語音轉文字',
-        'subTypeSpeechToText': '語音轉文字',
+
         'subTypeTextToVideo': '文生影片',
         'copied': '已複製',
         'copyFailed': '複製失敗',
@@ -236,7 +245,6 @@ const translations = {
         'saveToServer': '保存到伺服器',
         'saveToServerHint': '將此次記錄保存到伺服器進行追蹤',
         'adminTitle': 'API Keys 控制台',
-        'adminSubtitle': '管理和監控所有追蹤的金鑰',
         'backToMain': '返回',
         'noTrackedKeys': '暫無追蹤的金鑰',
         'startTracking': '在主頁面開始追蹤金鑰',
@@ -248,7 +256,11 @@ const translations = {
         'accountStatus': '狀態',
         'currentBalance': '餘額',
         'statusUnknown': '未知',
-        'dashboard': '控制台'
+        'dashboard': '控制台',
+        'justNow': '剛剛',
+        'minutesAgo': '{0}分鐘前',
+        'hoursAgo': '{0}小時前',
+        'daysAgo': '{0}天前'
     },
     'ja': {
         'title': 'SiliconFlow 残高アシスタント',
@@ -276,9 +288,9 @@ const translations = {
         'historyHint': '今後の参照用にクエリ記録を保存',
         'balanceHistory': '残高履歴',
         'balance': '残高',
-        'balance': '残高',
+
         'trackingError': '追跡ステータスの更新に失敗しました',
-        'userStatusTitle': 'ステータス',
+
         'remaining': '残り',
         'used': '使用済み',
         'updateTime': '更新時間',
@@ -291,7 +303,8 @@ const translations = {
         'lessThan24h': '< 24時間',
         'lessThan3d': '< 3日',
         'sessionUsed': '累積消費',
-        'trackedKey': 'Key ステータス',
+
+        'keyStatus': 'Key ステータス',
         'days': '日',
         'hours': '時間',
         'minutes': '分',
@@ -310,7 +323,7 @@ const translations = {
         'subTypeTextToImage': 'テキストから画像',
         'subTypeImageToImage': '画像から画像',
         'subTypeSpeechToText': '音声からテキスト',
-        'subTypeSpeechToText': '音声からテキスト',
+
         'subTypeTextToVideo': 'テキストから動画',
         'copied': 'コピーしました',
         'copyFailed': 'コピーに失敗しました',
@@ -320,7 +333,6 @@ const translations = {
         'saveToServer': 'サーバーに保存',
         'saveToServerHint': 'このレコードをサーバーに保存して追跡します',
         'adminTitle': 'APIキー ダッシュボード',
-        'adminSubtitle': '追跡中のすべてのキーを管理・監視',
         'backToMain': '戻る',
         'noTrackedKeys': '追跡中のキーがありません',
         'startTracking': 'メインページでキーの追跡を開始',
@@ -332,7 +344,11 @@ const translations = {
         'accountStatus': 'ステータス',
         'currentBalance': '残高',
         'statusUnknown': '不明',
-        'dashboard': 'ダッシュボード'
+        'dashboard': 'ダッシュボード',
+        'justNow': 'たった今',
+        'minutesAgo': '{0}分前',
+        'hoursAgo': '{0}時間前',
+        'daysAgo': '{0}日前'
     }
 };
 

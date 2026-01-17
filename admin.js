@@ -18,6 +18,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     checkAuth();
 });
 
+// Listen for language changes and re-render cards
+window.addEventListener('languageChanged', () => {
+    if (keysData.length > 0) {
+        renderAllKeys();
+    }
+});
+
 /**
  * Check if user is authenticated
  */
@@ -370,10 +377,10 @@ function formatTimeAgo(timestamp) {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffMins < 1) return t('justNow') || 'Just now';
+    if (diffMins < 60) return (t('minutesAgo') || '{0}m ago').replace('{0}', diffMins);
+    if (diffHours < 24) return (t('hoursAgo') || '{0}h ago').replace('{0}', diffHours);
+    if (diffDays < 7) return (t('daysAgo') || '{0}d ago').replace('{0}', diffDays);
 
     return time.toLocaleDateString();
 }
