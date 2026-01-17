@@ -122,21 +122,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             if (isChecked) {
-                // When enabling tracking, also enable save to server
-                if (saveToServerToggle && !saveToServerToggle.checked) {
+                // When enabling tracking, also enable save to server and disable it
+                if (saveToServerToggle) {
                     saveToServerToggle.checked = true;
+                    saveToServerToggle.disabled = true;
                     localStorage.setItem('sf_save_to_server', 'true');
-                    console.log('Auto-enabled save to server when tracking enabled');
+                    console.log('Auto-enabled and locked save to server when tracking enabled');
                 }
                 await enableTracking(currentApiKey);
             } else {
-                // When disabling tracking, do NOT change save to server state
+                // When disabling tracking, re-enable save to server control
+                if (saveToServerToggle) {
+                    saveToServerToggle.disabled = false;
+                    console.log('Re-enabled save to server control when tracking disabled');
+                }
                 await disableTracking(currentApiKey);
             }
         } catch (error) {
             console.error('Tracking toggle error:', error);
             // Revert checkbox state on error
             e.target.checked = !isChecked;
+            // Restore saveToServerToggle state on error
+            if (saveToServerToggle) {
+                saveToServerToggle.disabled = !isChecked;
+            }
             showError(t('trackingError') || 'Failed to update tracking status');
         }
     });
@@ -364,6 +373,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saveToServerToggle) {
         saveToServerToggle.addEventListener('change', (e) => {
             const isChecked = e.target.checked;
+
+            // If tracking is enabled and visible, prevent unchecking save to server
+            const trackingContainer = document.getElementById('trackingContainer');
+            const isTrackingVisible = trackingContainer && !trackingContainer.classList.contains('hidden');
+
+            if (trackToggle && trackToggle.checked && isTrackingVisible && !isChecked) {
+                console.log('Cannot disable save to server while tracking is enabled');
+                e.target.checked = true; // Force it back to checked
+                return;
+            }
+
             localStorage.setItem('sf_save_to_server', isChecked.toString());
             console.log('Save to server:', isChecked ? 'enabled' : 'disabled');
         });
@@ -450,9 +470,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success && result.data.is_tracked) {
                 trackToggle.checked = true;
+                // If tracking is active, also enable and lock save to server
+                if (saveToServerToggle) {
+                    saveToServerToggle.checked = true;
+                    saveToServerToggle.disabled = true;
+                    localStorage.setItem('sf_save_to_server', 'true');
+                    console.log('Auto-enabled and locked save to server because tracking is active');
+                }
                 await loadBalanceHistory(apiKey);
             } else {
                 trackToggle.checked = false;
+                // If not tracking, ensure save to server is enabled (not locked)
+                if (saveToServerToggle) {
+                    saveToServerToggle.disabled = false;
+                }
             }
         } catch (error) {
             console.error('Failed to check tracking status:', error);

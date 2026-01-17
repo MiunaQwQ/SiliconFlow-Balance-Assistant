@@ -659,6 +659,22 @@ button:disabled {
     line-height: 1.5;
 }
 
+/* Disabled state for history-control when checkbox is disabled */
+.history-control:has(input[type="checkbox"]:disabled) {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.history-control:has(input[type="checkbox"]:disabled):hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--glass-border);
+}
+
+.history-checkbox input[type="checkbox"]:disabled~.checkmark {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* Query History List */
 .history-list-container {
     margin-top: 16px;
@@ -670,12 +686,22 @@ button:disabled {
 }
 
 .history-list-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 14px;
     font-weight: 600;
     color: #fff;
     margin-bottom: 12px;
     padding-bottom: 8px;
     border-bottom: 1px solid var(--glass-border);
+}
+
+.history-list-title .title-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--accent-color);
+    flex-shrink: 0;
 }
 
 .history-list {
