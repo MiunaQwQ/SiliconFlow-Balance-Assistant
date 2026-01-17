@@ -5,6 +5,9 @@
 
 // State
 let keysData = [];
+let lastRefreshTime = null;
+let countdownInterval = null;
+const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 // Initialize page
 // Initialize page
@@ -140,11 +143,40 @@ async function loadAllKeys() {
         renderAllKeys();
         cardsGrid.classList.remove('hidden');
 
+        // Start countdown timer
+        // Calculate latest update time from keys to sync countdown
+        let maxTime = 0;
+        keysData.forEach(key => {
+            // Check both fields just in case
+            const time = new Date(key.last_update || key.last_checked_at).getTime();
+            if (!isNaN(time) && time > maxTime) {
+                maxTime = time;
+            }
+        });
+
+        // Determine base time for countdown
+        // If we have valid server data, use it. Otherwise fall back to now.
+        const targetTime = maxTime > 0 ? maxTime : Date.now();
+        const nextRefresh = targetTime + REFRESH_INTERVAL;
+
+        // Safety check: if data is stale (next refresh should have happened already),
+        // don't enter a refresh loop. Instead, wait for the next full interval from now.
+        // Allow a small buffer (e.g. 10 seconds) for network latency
+        if (nextRefresh <= (Date.now() + 10000)) {
+            console.warn('Server data appears stale or out of sync. Defaulting to 5m countdown from now.');
+            lastRefreshTime = Date.now();
+        } else {
+            lastRefreshTime = targetTime;
+        }
+
+        startCountdown();
+
     } catch (error) {
         console.error('Error loading keys:', error);
         loadingState.classList.add('hidden');
         errorState.classList.remove('hidden');
         document.getElementById('errorMessage').textContent = error.message;
+        stopCountdown();
     }
 }
 
@@ -485,4 +517,82 @@ function showToast(message) {
     setTimeout(() => {
         toast.className = 'toast';
     }, 3000);
+}
+
+/**
+ * Start countdown timer
+ */
+function startCountdown() {
+    const countdownElement = document.getElementById('adminRefreshCountdown');
+    const timerElement = document.getElementById('adminRefreshTimer');
+
+    if (!countdownElement || !timerElement) return;
+
+    // Clear any existing interval first (without hiding)
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+
+    // Show countdown
+    countdownElement.classList.remove('hidden');
+
+    // Update immediately
+    updateCountdown();
+
+    // Update every second
+    countdownInterval = setInterval(updateCountdown, 1000);
+}
+
+/**
+ * Stop countdown timer
+ */
+function stopCountdown() {
+    const countdownElement = document.getElementById('adminRefreshCountdown');
+
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+
+    if (countdownElement) {
+        countdownElement.classList.add('hidden');
+    }
+}
+
+/**
+ * Update countdown display
+ */
+function updateCountdown() {
+    const timerElement = document.getElementById('adminRefreshTimer');
+    const countdownElement = document.getElementById('adminRefreshCountdown');
+
+    if (!timerElement || !lastRefreshTime) return;
+
+    const now = Date.now();
+    const elapsed = now - lastRefreshTime;
+    const remaining = REFRESH_INTERVAL - elapsed;
+
+    if (remaining <= 0) {
+        // Time to refresh
+        loadAllKeys();
+        return;
+    }
+
+    // Calculate minutes and seconds
+    const totalSeconds = Math.floor(remaining / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    // Update display
+    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+    // Add warning class if less than 1 minute
+    if (countdownElement) {
+        if (totalSeconds < 60) {
+            countdownElement.classList.add('warning');
+        } else {
+            countdownElement.classList.remove('warning');
+        }
+    }
 }
