@@ -936,11 +936,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBalanceChart(historyData) {
-        // Dispose previous chart instance
-        if (balanceChartInstance) {
-            balanceChartInstance.dispose();
-        }
-
         // Get container element
         const chartDom = document.getElementById('balanceChart');
         if (!chartDom) {
@@ -948,8 +943,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Initialize ECharts instance
-        balanceChartInstance = echarts.init(chartDom);
+        // Only dispose and recreate if:
+        // 1. Instance doesn't exist yet, OR
+        // 2. Container has changed (unlikely but safe check)
+        if (!balanceChartInstance || balanceChartInstance.getDom() !== chartDom) {
+            if (balanceChartInstance) {
+                balanceChartInstance.dispose();
+            }
+            // Initialize ECharts instance
+            balanceChartInstance = echarts.init(chartDom);
+        }
+        // Otherwise, we'll just update the existing instance with setOption
 
         // Prepare data
         const xAxisData = historyData.map(item => {
@@ -1123,7 +1127,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }]
         };
 
-        balanceChartInstance.setOption(option);
+        // Update chart with smooth transition
+        // notMerge: false means merge with existing options (smoother updates)
+        // lazyUpdate: false means update immediately
+        balanceChartInstance.setOption(option, { notMerge: false, lazyUpdate: false });
 
         // Handle window resize
         const resizeHandler = () => {
