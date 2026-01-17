@@ -477,9 +477,16 @@ button:disabled {
     color: var(--glass-border);
 }
 
+/* Unified spacing for control items */
+.result-container+.history-control,
+.history-control+#trackingContainer,
+#trackingContainer+.history-control,
+.history-control+.history-control {
+    margin-top: 12px;
+}
+
 /* Tracking Control */
 .track-control {
-    margin-top: 24px;
     padding: 16px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--glass-border);
@@ -567,7 +574,6 @@ button:disabled {
 
 /* History Control  */
 .history-control {
-    margin-top: 24px;
     padding: 16px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--glass-border);
