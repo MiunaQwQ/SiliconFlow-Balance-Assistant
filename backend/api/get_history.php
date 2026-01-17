@@ -12,15 +12,30 @@ try {
     
     // Get parameters
     $apiKey = $_GET['api_key'] ?? '';
-    $days = intval($_GET['days'] ?? 7);
+    $days = isset($_GET['days']) ? intval($_GET['days']) : null;
+    $hours = isset($_GET['hours']) ? intval($_GET['hours']) : null;
     
     if (empty($apiKey)) {
         Response::error('API key is required', 400);
     }
     
-    // Limit days to reasonable range
-    if ($days < 1) $days = 7;
-    if ($days > 90) $days = 90;
+    // Determine time filter
+    if ($hours !== null) {
+        // Use hours if specified
+        if ($hours < 1) $hours = 2;
+        if ($hours > 168) $hours = 168; // Max 7 days
+        $timeFilter = "checked_at >= DATE_SUB(NOW(), INTERVAL ? HOUR)";
+        $timeParam = $hours;
+        $timeUnit = 'hours';
+    } else {
+        // Fallback to days
+        if ($days === null) $days = 7;
+        if ($days < 1) $days = 7;
+        if ($days > 90) $days = 90;
+        $timeFilter = "checked_at >= DATE_SUB(NOW(), INTERVAL ? DAY)";
+        $timeParam = $days;
+        $timeUnit = 'days';
+    }
     
     // Get tracked key ID
     $apiKeyHash = Crypto::hash($apiKey);
@@ -43,14 +58,14 @@ try {
         ], 'Tracking is disabled for this API key');
     }
     
-    // Get history data
+    // Get history data with dynamic time filter
     $history = $db->query(
-        'SELECT balance, status, checked_at 
+        "SELECT balance, status, checked_at 
          FROM balance_history 
          WHERE tracked_key_id = ? 
-         AND checked_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
-         ORDER BY checked_at ASC',
-        [$trackedKey['id'], $days]
+         AND $timeFilter
+         ORDER BY checked_at ASC",
+        [$trackedKey['id'], $timeParam]
     );
 
     // Get initial record for percentage calculation
@@ -66,7 +81,8 @@ try {
     Response::success([
         'is_tracked' => true,
         'tracked_key_id' => $trackedKey['id'],
-        'days' => $days,
+        'time_unit' => $timeUnit,
+        'time_value' => $timeParam,
         'count' => count($history),
         'initial_record' => $initialRecord,
         'history' => $history
