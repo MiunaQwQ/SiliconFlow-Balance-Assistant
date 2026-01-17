@@ -213,10 +213,10 @@ function createKeyCard(keyData) {
             <div class="circular-progress-container">
                 <div class="circular-progress" id="circular-${keyData.id}" 
                      style="background: conic-gradient(${colorHex} ${stats.degrees}deg, rgba(255, 255, 255, 0.1) 0deg)">
-                    <div class="inner-circle">
-                        <span class="${colorClass}">${stats.percentStr}</span>
-                        <span class="circle-label" data-i18n="remaining">remaining</span>
-                    </div>
+                </div>
+                <div class="inner-circle">
+                    <span class="${colorClass}">${stats.percentStr}</span>
+                    <span class="circle-label" data-i18n="remaining">remaining</span>
                 </div>
             </div>
 

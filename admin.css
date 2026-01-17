@@ -279,45 +279,50 @@ body {
 
 /* Circular Progress Size Adjustment for Grid */
 .circular-progress-container {
-    margin-bottom: 16px;
+    padding-bottom: 24px;
+    margin-bottom: 0;
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 16px auto;
 }
 
 .circular-progress {
     /* Reduced to 100px to avoid overlap with linear progress */
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100px;
     height: 100px;
-    margin: 0 auto;
+    margin: 0;
     border-radius: 50%;
     /* Background set inline by JS now */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
     transition: all 0.5s ease;
+    -webkit-mask: radial-gradient(transparent 42px, black 42.5px);
+    mask: radial-gradient(transparent 42px, black 42.5px);
 }
 
 .circular-progress::before {
-    content: '';
-    position: absolute;
-    width: 76px;
-    /* Adjusted for 100px parent */
-    height: 76px;
-    border-radius: 50%;
-    background: rgba(15, 23, 42, 0.95);
-    /* Better contrast background */
+    display: none;
 }
 
 /* Ensure inner circle content sits on top */
 .inner-circle {
-    position: relative;
-    z-index: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 84px;
+    height: 84px;
+    z-index: 10;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
 }
 
 .inner-circle span:first-child {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
 }
 
