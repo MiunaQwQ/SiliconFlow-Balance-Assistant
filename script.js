@@ -17,9 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorText = document.getElementById('errorText');
 
     // UI Elements for Data
-    const userName = document.getElementById('userName');
     const userEmail = document.getElementById('userEmail');
-    const avatarName = document.getElementById('avatarName');
     const totalBalance = document.getElementById('totalBalance');
     const userStatus = document.getElementById('userStatus');
     const userId = document.getElementById('userId');
@@ -336,6 +334,67 @@ document.addEventListener('DOMContentLoaded', () => {
             historyItem.appendChild(deleteButton);
             historyContainer.appendChild(historyItem);
         });
+
+        // Dynamically adjust history list height based on available space
+        adjustHistoryListHeight();
+    }
+
+    // Adjust history list height based on available card space
+    function adjustHistoryListHeight() {
+        const historyListContainer = document.getElementById('queryHistoryContainer');
+        const historyList = document.getElementById('queryHistoryList');
+        const card = document.querySelector('.card');
+
+        if (!historyListContainer || !historyList || !card) return;
+
+        // Only adjust when history is visible and result is not shown
+        const resultContainer = document.getElementById('result');
+        if (!historyListContainer.classList.contains('hidden') &&
+            resultContainer && resultContainer.classList.contains('hidden')) {
+
+            // Calculate available space
+            const cardHeight = card.offsetHeight;
+            const cardPaddingTop = parseInt(getComputedStyle(card).paddingTop);
+            const cardPaddingBottom = parseInt(getComputedStyle(card).paddingBottom);
+
+            // Get heights of elements before history list
+            let usedHeight = cardPaddingTop + cardPaddingBottom;
+
+            // Add up heights of all children before historyListContainer
+            const children = Array.from(card.children);
+            for (let child of children) {
+                if (child === historyListContainer) break;
+                if (!child.classList.contains('hidden')) {
+                    const style = getComputedStyle(child);
+                    usedHeight += child.offsetHeight;
+                    usedHeight += parseInt(style.marginTop) || 0;
+                    usedHeight += parseInt(style.marginBottom) || 0;
+                }
+            }
+
+            // Add historyListContainer's own padding and margins
+            const containerStyle = getComputedStyle(historyListContainer);
+            const containerPadding = parseInt(containerStyle.paddingTop) + parseInt(containerStyle.paddingBottom);
+            const containerMargin = parseInt(containerStyle.marginTop) + parseInt(containerStyle.marginBottom);
+
+            // Calculate title height
+            const titleElement = historyListContainer.querySelector('.history-list-title');
+            const titleHeight = titleElement ? titleElement.offsetHeight + parseInt(getComputedStyle(titleElement).marginBottom) : 0;
+
+            // Calculate available height for the list itself
+            const availableHeight = cardHeight - usedHeight - containerPadding - containerMargin - titleHeight - 80; // 80px buffer to prevent card scrollbar
+
+            // Each history item is approximately 52px (padding + content + gap)
+            const itemHeight = 52;
+            const minItems = 3;
+            const minHeight = minItems * itemHeight;
+
+            // Set max-height (at least 3 items, but use available space if more)
+            const maxHeight = Math.max(minHeight, availableHeight);
+            historyList.style.maxHeight = `${maxHeight}px`;
+
+            console.log(`Adjusted history list height: ${maxHeight}px (available: ${availableHeight}px, min: ${minHeight}px)`);
+        }
     }
 
     // Delete a history item
@@ -403,21 +462,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayResult(data) {
-        let displayName = data.name || data.username || data.nickname || '';
-
-        // Handle User Name
-        if (!displayName) {
-            userName.setAttribute('data-i18n', 'unknownUser');
-            userName.textContent = t('unknownUser');
-            displayName = 'U';
-        } else if (displayName === '个人') {
-            userName.setAttribute('data-i18n', 'userNamePersonal');
-            userName.textContent = t('userNamePersonal');
-        } else {
-            userName.removeAttribute('data-i18n');
-            userName.textContent = displayName;
-        }
-
         // Handle Email
         if (!data.email) {
             userEmail.setAttribute('data-i18n', 'noEmail');
@@ -426,10 +470,6 @@ document.addEventListener('DOMContentLoaded', () => {
             userEmail.removeAttribute('data-i18n');
             userEmail.textContent = data.email;
         }
-
-        // Avatar Initial
-        const nameInitial = (displayName === '个人' || displayName.length === 0) ? 'U' : (userName.textContent || 'U').charAt(0).toUpperCase();
-        avatarName.textContent = nameInitial;
 
         // Balance
         const balanceVal = data.balance !== undefined ? data.balance : (data.totalBalance || '0.00');
@@ -1080,6 +1120,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (balanceChartInstance) {
                 balanceChartInstance.resize();
             }
+            // Also adjust history list height on resize
+            adjustHistoryListHeight();
         };
 
         // Remove old listener if exists

@@ -364,7 +364,7 @@ button:disabled {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
 }
 
 .balance-item {
@@ -405,7 +405,7 @@ button:disabled {
     align-items: center;
     font-size: 13px;
     padding: 12px 16px;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--glass-border);
     border-radius: 12px;
@@ -708,8 +708,8 @@ button:disabled {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: 300px;
     overflow-y: auto;
+    /* max-height is set dynamically by JavaScript based on available space */
 }
 
 .history-item {
