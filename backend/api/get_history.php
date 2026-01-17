@@ -51,12 +51,10 @@ try {
         ], 'API key is not being tracked');
     }
     
-    if ($trackedKey['is_active'] == 0) {
-        Response::success([
-            'is_tracked' => false,
-            'history' => []
-        ], 'Tracking is disabled for this API key');
-    }
+    // Note: We still return history even if is_active = 0 (manually saved queries)
+    // is_active = 1: actively tracked, auto-updated by batch_check.php
+    // is_active = 0: manually saved queries, not auto-tracked
+    $isActivelyTracked = ($trackedKey['is_active'] == 1);
     
     // Get history data with dynamic time filter
     $history = $db->query(
@@ -80,6 +78,7 @@ try {
     
     Response::success([
         'is_tracked' => true,
+        'is_actively_tracked' => $isActivelyTracked, // true if is_active=1, false if is_active=0
         'tracked_key_id' => $trackedKey['id'],
         'time_unit' => $timeUnit,
         'time_value' => $timeParam,

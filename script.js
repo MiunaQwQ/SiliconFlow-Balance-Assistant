@@ -94,13 +94,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.code === 20000 && data.data) {
                 currentApiKey = apiKey;
                 displayResult(data.data);
+                // Save to server if enabled (do this BEFORE checkTrackingStatus so the data is available)
+                await saveQueryToServer(apiKey, data.data);
+                // Check tracking status and load history
                 await checkTrackingStatus(apiKey, data.data);
                 // Fetch and display supported models
                 await fetchModels(apiKey);
                 // Save to query history if enabled
                 saveQueryHistory(apiKey);
-                // Save to server if enabled
-                await saveQueryToServer(apiKey, data.data);
             } else {
                 throw new Error(data.message || t('errorFormat'));
             }
@@ -517,7 +518,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('sf_save_to_server', 'true');
                     console.log('Auto-enabled and locked save to server because tracking is active');
                 }
-                await loadBalanceHistory(apiKey);
             } else {
                 trackToggle.checked = false;
                 // If not tracking, ensure save to server is enabled (not locked)
@@ -525,9 +525,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     saveToServerToggle.disabled = false;
                 }
             }
+
+            // Always try to load balance history if there's any data
+            // This will show the chart for both actively tracked keys and manually saved queries
+            await loadBalanceHistory(apiKey);
         } catch (error) {
             console.error('Failed to check tracking status:', error);
             // Silent fail - user can still manually toggle tracking
+            // Still try to load history even if status check fails
+            try {
+                await loadBalanceHistory(apiKey);
+            } catch (historyError) {
+                console.error('Failed to load history after status check error:', historyError);
+            }
         }
     }
 
@@ -779,11 +789,11 @@ document.addEventListener('DOMContentLoaded', () => {
             statsBurnRateValue = statItems[1].querySelector('.stat-value');
         }
 
-        // 1. Model Name / User ID
-        const currentUserName = document.getElementById('userName').textContent;
-        // Check if generic or translated generic
-        const isGeneric = currentUserName === 'User Name' || currentUserName === t('userNamePersonal') || currentUserName === t('unknownUser');
-        statsModelName.textContent = !isGeneric ? currentUserName : t('trackedKey');
+        // 1. Model Name / User ID - use the API key's user ID as title
+        const currentUserId = userId.textContent;
+        // If it's just a number or placeholder, show generic "Tracked Key"
+        const isGeneric = !currentUserId || currentUserId === '...' || currentUserId === 'N/A' || !isNaN(currentUserId);
+        statsModelName.textContent = !isGeneric ? currentUserId : t('trackedKey');
 
         // 2. Calculate Percentage
         const history = data.history;
