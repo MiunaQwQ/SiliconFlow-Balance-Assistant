@@ -121,14 +121,6 @@
                 <p class="history-hint" data-i18n="historyHint">Save query records for future reference</p>
             </div>
 
-            <!-- Query History List -->
-            <div id="queryHistoryContainer" class="history-list-container hidden">
-                <h3 class="history-list-title" data-i18n="queryHistory">Query History</h3>
-                <div id="queryHistoryList" class="history-list">
-                    <!-- History items will be populated here via JavaScript -->
-                </div>
-            </div>
-
             <!-- Tracking Control (Shown after query) -->
             <div id="trackingContainer" class="hidden">
                 <div class="track-control">
@@ -138,6 +130,24 @@
                         <span class="track-label" data-i18n="trackThisKey">Track This API Key</span>
                     </label>
                     <p class="track-hint" data-i18n="trackHint">Enable to periodically record balance changes</p>
+                </div>
+            </div>
+
+            <!-- Save to Server Control (Always Visible) -->
+            <div class="history-control">
+                <label class="history-checkbox">
+                    <input type="checkbox" id="saveToServerToggle">
+                    <span class="checkmark"></span>
+                    <span class="history-label" data-i18n="saveToServer">Save to Server</span>
+                </label>
+                <p class="history-hint" data-i18n="saveToServerHint">Save this record to the server for tracking</p>
+            </div>
+
+            <!-- Query History List -->
+            <div id="queryHistoryContainer" class="history-list-container hidden">
+                <h3 class="history-list-title" data-i18n="queryHistory">Query History</h3>
+                <div id="queryHistoryList" class="history-list">
+                    <!-- History items will be populated here via JavaScript -->
                 </div>
             </div>
 

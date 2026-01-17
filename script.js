@@ -32,6 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // History toggle element
     const historyToggle = document.getElementById('historyToggle');
 
+    // Save to server toggle element
+    const saveToServerToggle = document.getElementById('saveToServerToggle');
+
     // Model list elements
     const modelList = document.getElementById('modelList');
     const modelsLoading = document.getElementById('modelsLoading');
@@ -42,6 +45,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedHistoryPreference = localStorage.getItem('sf_record_history');
     if (savedHistoryPreference !== null) {
         historyToggle.checked = savedHistoryPreference === 'true';
+    }
+
+    // Initialize save to server toggle from localStorage (default to true)
+    const savedSaveToServerPreference = localStorage.getItem('sf_save_to_server');
+    if (savedSaveToServerPreference !== null) {
+        saveToServerToggle.checked = savedSaveToServerPreference === 'true';
+    } else {
+        // Default to checked if no preference is saved
+        saveToServerToggle.checked = true;
+        localStorage.setItem('sf_save_to_server', 'true');
     }
 
     checkBtn.addEventListener('click', async () => {
@@ -88,6 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 await fetchModels(apiKey);
                 // Save to query history if enabled
                 saveQueryHistory(apiKey);
+                // Save to server if enabled
+                await saveQueryToServer(apiKey, data.data);
             } else {
                 throw new Error(data.message || t('errorFormat'));
             }
@@ -107,8 +122,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             if (isChecked) {
+                // When enabling tracking, also enable save to server
+                if (saveToServerToggle && !saveToServerToggle.checked) {
+                    saveToServerToggle.checked = true;
+                    localStorage.setItem('sf_save_to_server', 'true');
+                    console.log('Auto-enabled save to server when tracking enabled');
+                }
                 await enableTracking(currentApiKey);
             } else {
+                // When disabling tracking, do NOT change save to server state
                 await disableTracking(currentApiKey);
             }
         } catch (error) {
@@ -183,6 +205,46 @@ document.addEventListener('DOMContentLoaded', () => {
             updateHistoryDisplay();
         } catch (e) {
             console.error('Failed to save query history:', e);
+        }
+    }
+
+    // Save query data to server
+    async function saveQueryToServer(apiKey, userData) {
+        // Check if save to server is enabled
+        const isSaveToServerEnabled = localStorage.getItem('sf_save_to_server') === 'true';
+        if (!isSaveToServerEnabled) {
+            console.log('Save to server is disabled, skipping');
+            return;
+        }
+
+        try {
+            const balance = userData.balance || userData.totalBalance || 0;
+            const status = userData.status || 'active';
+            const userId = userData.id || null;
+            const userEmail = userData.email || null;
+
+            const formData = new FormData();
+            formData.append('api_key', apiKey);
+            formData.append('balance', balance);
+            formData.append('status', status);
+            if (userId) formData.append('user_id', userId);
+            if (userEmail) formData.append('user_email', userEmail);
+
+            const response = await fetch(`${BACKEND_URL}/save_query.php`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log('✓ Query data saved to server successfully:', result.data);
+            } else {
+                console.warn('⚠ Failed to save query data to server:', result.message);
+            }
+        } catch (error) {
+            console.error('✗ Error saving query data to server:', error);
+            // Don't show error to user - this is a non-critical background operation
         }
     }
 
@@ -296,6 +358,28 @@ document.addEventListener('DOMContentLoaded', () => {
             // Toggle the checkbox
             historyToggle.click();
         });
+    }
+
+    // Save to server toggle handler
+    if (saveToServerToggle) {
+        saveToServerToggle.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            localStorage.setItem('sf_save_to_server', isChecked.toString());
+            console.log('Save to server:', isChecked ? 'enabled' : 'disabled');
+        });
+
+        // Make entire save-to-server control card clickable (find parent history-control)
+        const saveToServerControl = saveToServerToggle.closest('.history-control');
+        if (saveToServerControl) {
+            saveToServerControl.addEventListener('click', (e) => {
+                // Don't trigger if clicking directly on checkbox or label
+                if (e.target === saveToServerToggle || e.target.closest('.history-checkbox')) {
+                    return;
+                }
+                // Toggle the checkbox
+                saveToServerToggle.click();
+            });
+        }
     }
 
     function displayResult(data) {
