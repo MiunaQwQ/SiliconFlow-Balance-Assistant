@@ -790,11 +790,9 @@ document.addEventListener('DOMContentLoaded', () => {
             statsBurnRateValue = statItems[1].querySelector('.stat-value');
         }
 
-        // 1. Model Name / User ID - use the API key's user ID as title
-        const currentUserId = userId.textContent;
-        // If it's just a number or placeholder, show generic "Tracked Key"
-        const isGeneric = !currentUserId || currentUserId === '...' || currentUserId === 'N/A' || !isNaN(currentUserId);
-        statsModelName.textContent = !isGeneric ? currentUserId : t('trackedKey');
+        // 1. Set static title
+        statsModelName.setAttribute('data-i18n', 'keyStatus');
+        statsModelName.textContent = t('keyStatus');
 
         // 2. Calculate Percentage
         const history = data.history;
