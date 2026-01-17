@@ -85,7 +85,11 @@ const translations = {
         'justNow': 'Just now',
         'minutesAgo': '{0}m ago',
         'hoursAgo': '{0}h ago',
-        'daysAgo': '{0}d ago'
+        'daysAgo': '{0}d ago',
+        'overview': 'Overview',
+        'historyViewMode': 'History View Mode',
+        'historyKeysOnly': 'Showing only keys from query history',
+        'clickToCopy': 'Click to copy'
     },
     'zh-CN': {
         'title': 'SiliconFlow 余额助手',
@@ -172,7 +176,11 @@ const translations = {
         'justNow': '刚刚',
         'minutesAgo': '{0}分钟前',
         'hoursAgo': '{0}小时前',
-        'daysAgo': '{0}天前'
+        'daysAgo': '{0}天前',
+        'overview': '概览',
+        'historyViewMode': '历史查看模式',
+        'historyKeysOnly': '仅显示查询历史中的密钥',
+        'clickToCopy': '点击复制'
     },
     'zh-TW': {
         'title': 'SiliconFlow 餘額助手',
@@ -260,7 +268,11 @@ const translations = {
         'justNow': '剛剛',
         'minutesAgo': '{0}分鐘前',
         'hoursAgo': '{0}小時前',
-        'daysAgo': '{0}天前'
+        'daysAgo': '{0}天前',
+        'overview': '概覽',
+        'historyViewMode': '歷史查看模式',
+        'historyKeysOnly': '僅顯示查詢歷史中的金鑰',
+        'clickToCopy': '點擊複製'
     },
     'ja': {
         'title': 'SiliconFlow 残高アシスタント',
@@ -348,7 +360,11 @@ const translations = {
         'justNow': 'たった今',
         'minutesAgo': '{0}分前',
         'hoursAgo': '{0}時間前',
-        'daysAgo': '{0}日前'
+        'daysAgo': '{0}日前',
+        'overview': '概要',
+        'historyViewMode': '履歴表示モード',
+        'historyKeysOnly': 'クエリ履歴のキーのみ表示',
+        'clickToCopy': 'クリックしてコピー'
     }
 };
 

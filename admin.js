@@ -8,6 +8,7 @@ let keysData = [];
 let lastRefreshTime = null;
 let countdownInterval = null;
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+let isHistoryViewMode = false; // Flag for history-view mode
 
 // Initialize page
 // Initialize page
@@ -17,8 +18,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('langSelect').value = savedLang;
     await setLanguage(savedLang);
 
-    // Check Auth
-    checkAuth();
+    // Check if opened in history-view mode
+    const urlParams = new URLSearchParams(window.location.search);
+    isHistoryViewMode = urlParams.get('mode') === 'history-view';
+
+    // If in history-view mode, show notice and skip to loading keys
+    if (isHistoryViewMode) {
+        addHistoryViewNotice();
+        loadAllKeys();
+    } else {
+        // Check Auth normally
+        checkAuth();
+    }
 });
 
 // Listen for language changes and re-render cards
@@ -119,10 +130,36 @@ async function loadAllKeys() {
         errorState.classList.add('hidden');
         cardsGrid.classList.add('hidden');
 
-        const response = await fetch('backend/api/get_all_keys.php?t=' + new Date().getTime(), {
-            cache: 'no-store'
-        });
-        const result = await response.json();
+        let response, result;
+
+        // In history-view mode, use different endpoint that only fetches specific keys
+        if (isHistoryViewMode) {
+            // Get keys from localStorage history
+            const historyKeys = getHistoryKeys();
+
+            if (historyKeys.length === 0) {
+                // No history keys, show empty state immediately
+                loadingState.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            // Send history keys to backend for server-side filtering
+            response = await fetch('backend/api/get_history_keys.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ keys: historyKeys })
+            });
+        } else {
+            // Normal mode: fetch all tracked keys
+            response = await fetch('backend/api/get_all_keys.php?t=' + new Date().getTime(), {
+                cache: 'no-store'
+            });
+        }
+
+        result = await response.json();
 
         if (!result.success) {
             throw new Error(result.message || 'Failed to fetch keys');
@@ -297,6 +334,66 @@ function createKeyCard(keyData) {
     `;
 
     return card;
+}
+
+/**
+ * Get API keys from localStorage query history
+ * Returns array of full API key strings
+ */
+function getHistoryKeys() {
+    try {
+        const stored = localStorage.getItem('sf_query_history');
+        if (!stored) return [];
+
+        const history = JSON.parse(stored);
+        return history.map(item => item.key).filter(key => key && key.trim());
+    } catch (e) {
+        console.error('Failed to get history keys:', e);
+        return [];
+    }
+}
+
+/**
+ * Add a notice banner at the top when in history-view mode
+ */
+function addHistoryViewNotice() {
+    const adminContainer = document.querySelector('.admin-container');
+    const header = document.querySelector('.admin-header');
+
+    if (!adminContainer || !header) return;
+
+    const notice = document.createElement('div');
+    notice.className = 'history-view-notice';
+    notice.style.cssText = `
+        background: rgba(167, 139, 250, 0.15);
+        border: 1px solid rgba(167, 139, 250, 0.3);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin: 0 20px 20px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #a78bfa;
+        font-size: 14px;
+    `;
+
+    notice.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+            <strong data-i18n="historyViewMode">History View Mode</strong>
+            <span style="margin-left: 8px; opacity: 0.9;" data-i18n="historyKeysOnly">Showing only keys from query history</span>
+        </div>
+    `;
+
+    // Insert after header
+    header.insertAdjacentElement('afterend', notice);
+
+    // Apply translations to the notice
+    if (typeof applyTranslations === 'function') {
+        applyTranslations();
+    }
 }
 
 /**

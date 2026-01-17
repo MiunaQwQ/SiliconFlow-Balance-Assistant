@@ -688,6 +688,7 @@ button:disabled {
 .history-list-title {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
     font-size: 14px;
     font-weight: 600;
@@ -701,6 +702,40 @@ button:disabled {
     width: 18px;
     height: 18px;
     color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+/* Overview Button */
+.history-overview-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(167, 139, 250, 0.15);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 8px;
+    color: var(--accent-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    width: auto;
+}
+
+.history-overview-btn:hover {
+    background: rgba(167, 139, 250, 0.25);
+    border-color: var(--accent-color);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+}
+
+.history-overview-btn:active {
+    transform: translateY(0);
+}
+
+.history-overview-btn svg {
     flex-shrink: 0;
 }
 

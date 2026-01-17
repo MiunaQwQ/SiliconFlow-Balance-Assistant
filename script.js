@@ -1358,3 +1358,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 });
+
+/**
+ * Open admin overview page in history-view mode
+ * This allows viewing tracked keys without password, limited to query history keys
+ */
+function openHistoryOverview() {
+    // Navigate to admin.html with history-view parameter
+    window.open('admin.html?mode=history-view', '_blank');
+}
