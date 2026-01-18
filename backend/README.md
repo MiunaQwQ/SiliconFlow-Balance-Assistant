@@ -2,7 +2,7 @@
 
 ## Overview
 
-This backend provides APIs for tracking SiliconFlow API keys and recording their balance history. Features include automated batch checking, smart auto-disable when balance reaches zero, and flexible historical data queries.
+This backend provides comprehensive APIs for tracking SiliconFlow API keys, recording balance history, and managing administrative access. Features include automated batch checking, smart auto-disable when balance reaches zero, flexible historical data queries, query history management, and password-protected admin dashboard support.
 
 ## Environment Requirements
 
@@ -38,6 +38,7 @@ Required settings:
 - `DB_USER`: Database username
 - `DB_PASS`: Database password
 - `ENCRYPTION_KEY`: Random 32-character key for AES encryption
+- `ADMIN_PASSWORD`: Admin dashboard password (default: `admin123`, **change in production**)
 
 Generate encryption key:
 ```bash
@@ -199,7 +200,124 @@ Response:
 ```
 
 **Purpose**: This endpoint retrieves the most recent balance record from the database, used by the frontend for automatic refresh without querying the SiliconFlow API directly.
+
+### 5. Get All Tracked Keys (Admin)
+
+**Endpoint**: `GET /backend/api/get_all_keys.php`
+
+```bash
+GET /backend/api/get_all_keys.php
 ```
+
+Response:
+```json
+{
+  "success": true,
+  "message": "Keys retrieved successfully",
+  "data": {
+    "keys": [
+      {
+        "id": 1,
+        "user_id": "123",
+        "user_email": "user@example.com",
+        "balance": 98.50,
+        "status": "active",
+        "created_at": "2026-01-16 03:00:00",
+        "last_checked_at": "2026-01-18 14:30:00"
+      }
+    ],
+    "count": 1
+  }
+}
+```
+
+**Note**: This endpoint is used by the admin dashboard to display all tracked API keys.
+
+### 6. Get History Keys
+
+**Endpoint**: `GET /backend/api/get_history_keys.php`
+
+```bash
+GET /backend/api/get_history_keys.php
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "keys": [
+      {
+        "masked_key": "sk-****3456",
+        "last_queried": "2026-01-18 14:30:00"
+      }
+    ]
+  }
+}
+```
+
+**Purpose**: Retrieves API keys that have been queried before (for history display).
+
+### 7. Get Supported Models
+
+**Endpoint**: `GET /backend/api/get_models.php`
+
+```bash
+GET /backend/api/get_models.php?api_key=sk-xxxxx
+```
+
+Response:
+```json
+{
+  "success": true,
+  "models": [
+    {"id": "model-1", "name": "Model Name"}
+  ]
+}
+```
+
+### 8. Save Query Record
+
+**Endpoint**: `POST /backend/api/save_query.php`
+
+```bash
+POST /backend/api/save_query.php
+Content-Type: application/x-www-form-urlencoded
+
+api_key=sk-xxxxx
+```
+
+**Purpose**: Saves a query record to the database for history tracking.
+
+### 9. Admin Login
+
+**Endpoint**: `POST /backend/api/login.php`
+
+```bash
+POST /backend/api/login.php
+Content-Type: application/x-www-form-urlencoded
+
+password=your_admin_password
+```
+
+Response:
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "token": "session_token_here"
+}
+```
+
+### 10. Check Authentication
+
+**Endpoint**: `GET /backend/api/check_auth.php`
+
+```bash
+GET /backend/api/check_auth.php
+```
+
+**Purpose**: Validates admin session token.
 
 ## Scheduled Task Configuration
 
@@ -274,7 +392,13 @@ backend/
 │   ├── track_key.php          # Tracking management
 │   ├── batch_check.php        # Scheduled batch checking (with auto-disable)
 │   ├── get_history.php        # Historical data retrieval
-│   └── get_latest_balance.php # Latest balance from DB
+│   ├── get_latest_balance.php # Latest balance from DB
+│   ├── get_all_keys.php       # Get all tracked keys (admin)
+│   ├── get_history_keys.php   # Get query history keys
+│   ├── get_models.php         # Get supported models
+│   ├── save_query.php         # Save query record
+│   ├── login.php              # Admin login
+│   └── check_auth.php         # Authentication check
 ├── database/
 │   └── schema.sql             # Database schema
 ├── logs/                      # Application logs
@@ -285,12 +409,19 @@ backend/
 
 ## Recent Updates
 
+### Admin Dashboard & Query History (v1.3.0)
+- Added admin authentication endpoints (`login.php`, `check_auth.php`)
+- Implemented `get_all_keys.php` for admin dashboard data
+- Added `get_history_keys.php` for query history management
+- Implemented `save_query.php` for saving query records
+- Added `get_models.php` for retrieving supported models
+
 ### Auto-Disable Tracking (v1.1.0)
 - Automatically disables tracking when balance reaches zero to save resources
 - Implemented in `batch_check.php`
 - Logs auto-disable actions for audit purposes
 
-### Enhanced Data Retrieval
+### Enhanced Data Retrieval (v1.1.0)
 - Added `get_latest_balance.php` for efficient database-based refresh
 - Enhanced `get_history.php` to support hour-based filtering
 - History display no longer requires active tracking
