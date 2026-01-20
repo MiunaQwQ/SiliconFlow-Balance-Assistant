@@ -189,26 +189,26 @@ function shouldCheckBalance($db, $trackedKeyId, $lastCheckedAt) {
         }
     }
     
-    // Calculate minutes since last check (for stable logging)
+    // Calculate minutes since last check
     $lastCheckedTime = strtotime($lastCheckedAt);
     $currentTime = time();
     $minutesSinceLastCheck = ($currentTime - $lastCheckedTime) / 60;
     
-    // Decision logic:
-    // - If balance changed recently: check if >= 1 minute has passed
-    // - If balance stable: check if >= 5 minutes has passed
+    // Decision logic with tolerance for cron timing variations:
+    // - If balance changed recently: check if >= 0.9 minutes (~54s) has passed (allows ~6s tolerance)
+    // - If balance stable: check if >= 4.8 minutes (~288s) has passed (allows ~12s tolerance)
     if ($balanceChanged) {
-        // Balance is changing, check every 1 minute
-        $shouldCheck = $minutesSinceLastCheck >= 1;
+        // Balance is changing, check approximately every 1 minute (with tolerance)
+        $shouldCheck = $minutesSinceLastCheck >= 0.9;
         if (!$shouldCheck) {
-            Logger::debug("Balance changing for tracked_key_id {$trackedKeyId}, but only {$minutesSinceLastCheck} minutes since last check (need 1 min)");
+            Logger::debug("Balance changing for tracked_key_id {$trackedKeyId}, but only {$minutesSinceLastCheck} minutes since last check (need 0.9 min)");
         }
         return $shouldCheck;
     } else {
-        // Balance is stable, check every 5 minutes
-        $shouldCheck = $minutesSinceLastCheck >= 5;
+        // Balance is stable, check approximately every 5 minutes (with tolerance)
+        $shouldCheck = $minutesSinceLastCheck >= 4.8;
         if (!$shouldCheck) {
-            Logger::debug("Balance stable for tracked_key_id {$trackedKeyId}, only {$minutesSinceLastCheck} minutes since last check (need 5 min)");
+            Logger::debug("Balance stable for tracked_key_id {$trackedKeyId}, only {$minutesSinceLastCheck} minutes since last check (need 4.8 min)");
         }
         return $shouldCheck;
     }
