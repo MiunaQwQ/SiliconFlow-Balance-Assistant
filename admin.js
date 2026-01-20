@@ -7,7 +7,7 @@
 let keysData = [];
 let lastRefreshTime = null;
 let countdownInterval = null;
-const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+let REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds, can be dynamic
 let isHistoryViewMode = false; // Flag for history-view mode
 
 // Initialize page
@@ -195,6 +195,10 @@ async function loadAllKeys() {
             lastRefreshTime = Date.now();
             console.warn('No batch check time available, using current time. Countdown may be inaccurate until first batch check runs.');
         }
+
+        // Determine dynamic refresh interval
+        REFRESH_INTERVAL = determineGlobalRefreshInterval();
+        console.log(`Using refresh interval: ${REFRESH_INTERVAL / 60000} minute(s)`);
 
         startCountdown();
 
@@ -604,6 +608,27 @@ function showToast(message) {
     setTimeout(() => {
         toast.className = 'toast';
     }, 3000);
+}
+
+/**
+ * Determine global refresh interval
+ * Uses 1 minute if ANY key has changing balance, otherwise 5 minutes
+ */
+function determineGlobalRefreshInterval() {
+    if (!keysData || keysData.length === 0) {
+        return 5 * 60 * 1000; // Default 5 minutes
+    }
+
+    // If ANY key has changing balance, use 1 minute
+    const hasChangingBalance = keysData.some(key => key.balance_changing === true);
+
+    if (hasChangingBalance) {
+        console.log('At least one key has changing balance, using 1-minute interval');
+        return 1 * 60 * 1000;
+    } else {
+        console.log('All keys stable, using 5-minute interval');
+        return 5 * 60 * 1000;
+    }
 }
 
 /**

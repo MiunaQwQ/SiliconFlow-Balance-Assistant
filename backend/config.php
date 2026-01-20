@@ -166,6 +166,10 @@ class Logger {
     public static function info($message) {
         self::log($message, 'INFO');
     }
+    
+    public static function debug($message) {
+        self::log($message, 'DEBUG');
+    }
 }
 
 // Initialize logger

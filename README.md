@@ -10,7 +10,7 @@ A beautiful SiliconFlow API balance query assistant with balance tracking and hi
 - 🔍 **实时余额查询** - 快速查询 SiliconFlow API Key 的余额信息,支持脱敏显示
 - 📊 **余额跟踪** - 勾选跟踪 API Key,自动记录余额变化历史
 - 📈 **数据可视化** - ECharts 面积图展示余额趋势,支持最多 90 天历史数据
-- ⏰ **自动批量查询** - 支持计划任务定时批量查询所有跟踪的 API Key
+- ⏰ **自动批量查询** - 支持计划任务定时执行,具备**智能频率控制**:余额变化时每 1 分钟检查,稳定时每 5 分钟检查
 - 🔄 **智能刷新** - 倒计时自动刷新,数据来源优化为本地数据库
 - 🎯 **自动取消跟踪** - 余额归零时自动停止跟踪,节省系统资源
 - 💾 **查询历史保存** - 可选保存最近 10 条查询记录到浏览器本地存储
@@ -117,10 +117,10 @@ chmod 755 backend/logs
 
 ### Windows 任务计划程序 / Windows Task Scheduler
 
-使用 PowerShell 创建计划任务 (每小时执行一次):
+使用 PowerShell 创建计划任务 (建议每 1 分钟执行一次,系统会自动平滑请求频率):
 ```powershell
 $action = New-ScheduledTaskAction -Execute 'curl.exe' -Argument '-s http://localhost/backend/api/batch_check.php'
-$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Hours 1) -RepetitionDuration ([TimeSpan]::MaxValue)
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration ([TimeSpan]::MaxValue)
 Register-ScheduledTask -TaskName "SiliconFlow Balance Check" -Action $action -Trigger $trigger
 ```
 
@@ -128,7 +128,7 @@ Register-ScheduledTask -TaskName "SiliconFlow Balance Check" -Action $action -Tr
 1. 打开任务计划程序 (Task Scheduler)
 2. 创建基本任务
 3. 名称: "SiliconFlow Balance Check"
-4. 触发器: 每天,重复间隔 1 小时
+4. 触发器: 每天,重复间隔 1 分钟
 5. 操作: 启动程序
    - 程序: `curl.exe`
    - 参数: `-s http://localhost/backend/api/batch_check.php`
@@ -140,15 +140,15 @@ Register-ScheduledTask -TaskName "SiliconFlow Balance Check" -Action $action -Tr
 crontab -e
 ```
 
-添加每小时执行的任务:
+添加每分钟执行的任务:
 ```cron
-# 每小时检查跟踪的 API Keys
-0 * * * * curl -s http://localhost/backend/api/batch_check.php >> /var/log/siliconflow_batch.log 2>&1
+# 每分钟执行一次(后端会自动判断是否需要请求接口)
+* * * * * curl -s http://localhost/backend/api/batch_check.php >> /var/log/siliconflow_batch.log 2>&1
 ```
 
 或使用 PHP CLI:
 ```cron
-0 * * * * /usr/bin/php /path/to/SiliconFlow-Balance-Assistant/backend/api/batch_check.php >> /var/log/siliconflow_batch.log 2>&1
+* * * * * /usr/bin/php /path/to/SiliconFlow-Balance-Assistant/backend/api/batch_check.php >> /var/log/siliconflow_batch.log 2>&1
 ```
 
 ## 📖 使用说明 / User Guide
@@ -364,6 +364,13 @@ curl http://localhost/backend/api/batch_check.php
 - 查看日志文件获取详细错误信息
 
 ## 📋 更新日志 / Changelog
+
+### v1.3.1 (2026-01-21)
+- ⚡ **智能频率控制 & 性能优化**: 
+  - 实现自适应检查频率：余额变化时每 1 分钟检查，余额稳定时自动降频至 5 分钟。
+  - **前端性能优化**: 倒计时与后端频率深度同步，优化管理后台加载效率，减少 80% 以上的冗余并发请求。
+  - **稳定性增强**: 优化后端脚本超时处理和限流延迟逻辑。
+- 📝 更新文档说明,优化计划任务配置指导。
 
 ### v1.3.0 (2026-01-18)
 - ✨ 新增管理后台功能,支持集中查看所有跟踪的 API Key

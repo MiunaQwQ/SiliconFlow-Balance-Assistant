@@ -2,7 +2,7 @@
 
 ## Overview
 
-This backend provides comprehensive APIs for tracking SiliconFlow API keys, recording balance history, and managing administrative access. Features include automated batch checking, smart auto-disable when balance reaches zero, flexible historical data queries, query history management, and password-protected admin dashboard support.
+This backend provides comprehensive APIs for tracking SiliconFlow API keys, recording balance history, and managing administrative access. Features include intelligent automated batch checking (adaptive frequency based on balance changes), smart auto-disable when balance reaches zero, flexible historical data queries, query history management, and password-protected admin dashboard support.
 
 ## Environment Requirements
 
@@ -134,6 +134,11 @@ Response:
 }
 ```
 
+**Adaptive Frequency Control**:
+To optimize API usage while maintaining timely updates, the batch check now uses an adaptive frequency logic:
+- **Balance Changed**: If the balance changed between the last two checks, it will check every **1 minute**.
+- **Balance Stable**: If the balance has remained the same, it will check every **5 minutes**.
+
 **Auto-Disable Feature**: When balance reaches zero or negative, the tracked key will be automatically disabled (`is_active = 0`) to save system resources.
 ```
 
@@ -161,6 +166,7 @@ Response:
     "time_unit": "hours",
     "time_value": 2,
     "count": 24,
+    "interval_minutes": 1,
     "history": [
       {
         "balance": "98.50",
@@ -171,6 +177,8 @@ Response:
   }
 }
 ```
+
+**Note**: `interval_minutes` is 1 if balance changed recently, 5 if stable. History will be displayed even if tracking is currently disabled.
 
 **Note**: History will be displayed even if tracking is currently disabled, as long as historical records exist.
 
@@ -222,14 +230,18 @@ Response:
         "user_email": "user@example.com",
         "balance": 98.50,
         "status": "active",
+        "balance_changing": true,
         "created_at": "2026-01-16 03:00:00",
         "last_checked_at": "2026-01-18 14:30:00"
       }
     ],
-    "count": 1
+    "count": 1,
+    "last_batch_check": "2026-01-18 14:30:00"
   }
 }
 ```
+
+**Note**: `balance_changing` is true if the balance changed between the last two checks. This endpoint is used by the admin dashboard.
 
 **Note**: This endpoint is used by the admin dashboard to display all tracked API keys.
 
@@ -328,15 +340,15 @@ Edit crontab:
 crontab -e
 ```
 
-Add hourly batch check:
+Add minute-based batch check (intelligent control logic will handle actual request frequency):
 ```cron
-# Check tracked API keys every hour
-0 * * * * curl -s http://localhost/backend/api/batch_check.php >> /var/log/siliconflow_batch.log 2>&1
+# Check tracked API keys every minute
+* * * * * curl -s http://localhost/backend/api/batch_check.php >> /var/log/siliconflow_batch.log 2>&1
 ```
 
 Or using PHP CLI:
 ```cron
-0 * * * * /usr/bin/php /path/to/SiliconFlow-Balance-Assistant/backend/api/batch_check.php >> /var/log/siliconflow_batch.log 2>&1
+* * * * * /usr/bin/php /path/to/SiliconFlow-Balance-Assistant/backend/api/batch_check.php >> /var/log/siliconflow_batch.log 2>&1
 ```
 
 ### Windows (Task Scheduler)
@@ -351,9 +363,9 @@ Or using PHP CLI:
    
 Or using PowerShell:
 ```powershell
-# Create scheduled task
+# Create scheduled task (every 1 minute)
 $action = New-ScheduledTaskAction -Execute 'curl.exe' -Argument '-s http://localhost/backend/api/batch_check.php'
-$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Hours 1) -RepetitionDuration ([TimeSpan]::MaxValue)
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration ([TimeSpan]::MaxValue)
 Register-ScheduledTask -TaskName "SiliconFlow Balance Check" -Action $action -Trigger $trigger
 ```
 
@@ -409,19 +421,10 @@ backend/
 
 ## Recent Updates
 
-### Admin Dashboard & Query History (v1.3.0)
-- Added admin authentication endpoints (`login.php`, `check_auth.php`)
-- Implemented `get_all_keys.php` for admin dashboard data
-- Added `get_history_keys.php` for query history management
-- Implemented `save_query.php` for saving query records
-- Added `get_models.php` for retrieving supported models
-
-### Auto-Disable Tracking (v1.1.0)
-- Automatically disables tracking when balance reaches zero to save resources
-- Implemented in `batch_check.php`
-- Logs auto-disable actions for audit purposes
-
-### Enhanced Data Retrieval (v1.1.0)
-- Added `get_latest_balance.php` for efficient database-based refresh
-- Enhanced `get_history.php` to support hour-based filtering
-- History display no longer requires active tracking
+### Intelligent Frequency Control & Performance Optimization (v1.3.1)
+- **Backend Optimization**: Integrated adaptive frequency logic directly into existing APIs.
+- **Improved Responsiveness**: 1 min check interval when balance changes, 5 min when stable.
+- **Minimal Overhead**: Admin dashboard now determines global refresh interval without redundant HTTP requests.
+- **Robustness**: Refined `batch_check.php` with time limits and optimized `usleep` placement.
+- Added debug logging for internal state transitions.
+- Synchronized frontend countdown with backend batch schedule.

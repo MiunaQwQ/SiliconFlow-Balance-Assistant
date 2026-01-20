@@ -77,6 +77,42 @@ try {
         ";
         $recentHistory = $db->query($recentHistoryQuery, ['key_id' => $key['id']]);
         
+        // Determine if balance is changing (look at last 6 minutes of records + predecessors)
+        $recentBalances = $db->query(
+            "SELECT balance, checked_at 
+             FROM balance_history 
+             WHERE tracked_key_id = ? 
+             ORDER BY checked_at DESC, id DESC 
+             LIMIT 15",
+            [$key['id']]
+        );
+        
+        $isChanging = false;
+        
+        if (count($recentBalances) < 2) {
+             // If less than 2 records in total (or very recent), consider it changing (initial phase or sparse data)
+             $isChanging = true;
+        } else {
+            $thresholdTime = time() - (6 * 60); // 6 minutes ago
+            
+            // Iterate through records to find any change occurring within the time window
+            for ($i = 0; $i < count($recentBalances) - 1; $i++) {
+                $currentRecord = $recentBalances[$i];
+                $prevRecord = $recentBalances[$i + 1];
+                
+                // If the current record is older than 6 minutes, we stop looking
+                if (strtotime($currentRecord['checked_at']) < $thresholdTime) {
+                    break;
+                }
+                
+                // Compare current record with the previous one
+                if ($currentRecord['balance'] != $prevRecord['balance']) {
+                    $isChanging = true;
+                    break;
+                }
+            }
+        }
+
         return [
             'id' => $key['id'],
             'full_key' => $decryptedKey, // Decrypted key for copy functionality
@@ -92,7 +128,8 @@ try {
             'last_update' => $key['last_update'],
             'initial_check_time' => $key['initial_check_time'],
             'created_at' => $key['created_at'],
-            'recent_history' => $recentHistory // 48-hour history for burn rate
+            'balance_changing' => $isChanging, // Added for frontend countdown optimization
+            'recent_history' => $recentHistory // 30-minute history for burn rate
         ];
     }, $keys);
     

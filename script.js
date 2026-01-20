@@ -587,6 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastUpdateTime = null;
     let countdownInterval = null;
     let refreshCountdownElement = null;
+    let currentRefreshInterval = 5 * 60 * 1000; // Default 5 minutes, can be dynamic
 
     // Initialize countdown element reference after DOM is ready
     function initCountdownElement() {
@@ -682,8 +683,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!lastUpdateTime || !refreshCountdownElement) return;
 
         const now = Date.now();
-        const refreshInterval = 5 * 60 * 1000; // 5 minutes in ms
-        const nextRefreshTime = lastUpdateTime + refreshInterval;
+        const nextRefreshTime = lastUpdateTime + currentRefreshInterval;
         const remaining = nextRefreshTime - now;
 
         // Debug logging (only log occasionally to avoid spam)
@@ -693,7 +693,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 now,
                 nextRefreshTime,
                 remaining,
-                remainingSeconds: Math.floor(remaining / 1000)
+                remainingSeconds: Math.floor(remaining / 1000),
+                currentInterval: currentRefreshInterval / 1000 + 's'
             });
         }
 
@@ -748,15 +749,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderBalanceChart(result.data.history);
                 updateStatsCard(result.data, apiKey);
                 historyChart.classList.remove('hidden');
+
                 // Get the actual last update time from the latest record
                 const latestRecord = result.data.history[result.data.history.length - 1];
                 lastUpdateTime = new Date(latestRecord.checked_at).getTime();
 
-                // Debug logging
-                console.log('Latest record checked_at:', latestRecord.checked_at);
-                console.log('lastUpdateTime (ms):', lastUpdateTime);
-                console.log('Current time (ms):', Date.now());
-                console.log('Time difference (seconds):', (Date.now() - lastUpdateTime) / 1000);
+                // Determine dynamic refresh interval based on data from backend
+                const intervalMinutes = result.data.interval_minutes || 5;
+                currentRefreshInterval = intervalMinutes * 60 * 1000;
+                console.log(`Dynamic interval applied: ${intervalMinutes} minute(s)`);
 
                 startCountdown();
             } else {

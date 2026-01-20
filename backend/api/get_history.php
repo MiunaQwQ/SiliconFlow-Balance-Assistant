@@ -66,6 +66,44 @@ try {
         [$trackedKey['id'], $timeParam]
     );
 
+    // Determine check interval based on balance change (look at last 6 minutes of records + predecessors)
+    $recentBalances = $db->query(
+        "SELECT balance, checked_at 
+         FROM balance_history 
+         WHERE tracked_key_id = ? 
+         ORDER BY checked_at DESC, id DESC 
+         LIMIT 15",
+        [$trackedKey['id']]
+    );
+
+    $intervalMinutes = 5; // Default stable
+
+    if (count($recentBalances) < 2) {
+         // Initial phase or sparse data
+         $intervalMinutes = 1;
+    } else {
+        $thresholdTime = time() - (6 * 60); // 6 minutes ago
+        $balanceChanged = false;
+        
+        // Iterate through records to find any change occurring within the time window
+        for ($i = 0; $i < count($recentBalances) - 1; $i++) {
+            $currentRecord = $recentBalances[$i];
+            $prevRecord = $recentBalances[$i + 1];
+            
+            // If the current record is older than 6 minutes, we stop looking
+            if (strtotime($currentRecord['checked_at']) < $thresholdTime) {
+                break;
+            }
+            
+            // Compare current record with the previous one
+            if ($currentRecord['balance'] != $prevRecord['balance']) {
+                $balanceChanged = true;
+                break;
+            }
+        }
+        $intervalMinutes = $balanceChanged ? 1 : 5;
+    }
+
     // Get initial record for percentage calculation
     $initialRecord = $db->queryOne(
         'SELECT balance, checked_at FROM balance_history 
@@ -75,7 +113,7 @@ try {
     );
     
     Logger::info("Retrieved " . count($history) . " history records for tracked_key_id: {$trackedKey['id']}");
-    
+
     Response::success([
         'is_tracked' => true,
         'is_actively_tracked' => $isActivelyTracked, // true if is_active=1, false if is_active=0
@@ -83,6 +121,7 @@ try {
         'time_unit' => $timeUnit,
         'time_value' => $timeParam,
         'count' => count($history),
+        'interval_minutes' => $intervalMinutes, // Added for frontend countdown optimization
         'initial_record' => $initialRecord,
         'history' => $history
     ], 'History data retrieved successfully');
