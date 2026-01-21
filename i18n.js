@@ -89,7 +89,11 @@ const translations = {
         'overview': 'Overview',
         'historyViewMode': 'History View Mode',
         'historyKeysOnly': 'Showing only keys from query history',
-        'clickToCopy': 'Click to copy'
+        'clickToCopy': 'Click to copy',
+        'overallHealth': 'Overall Health',
+        'activeKeys': 'Active Keys',
+        'usage24h': '24H Usage',
+        'changedKeys24h': '24H Changed'
     },
     'zh-CN': {
         'title': 'SiliconFlow 余额助手',
@@ -180,7 +184,11 @@ const translations = {
         'overview': '概览',
         'historyViewMode': '历史查看模式',
         'historyKeysOnly': '仅显示查询历史中的密钥',
-        'clickToCopy': '点击复制'
+        'clickToCopy': '点击复制',
+        'overallHealth': '整体健康度',
+        'activeKeys': '活跃 Keys',
+        'usage24h': '24小时消耗',
+        'changedKeys24h': '24H 变动'
     },
     'zh-TW': {
         'title': 'SiliconFlow 餘額助手',
@@ -272,7 +280,11 @@ const translations = {
         'overview': '概覽',
         'historyViewMode': '歷史查看模式',
         'historyKeysOnly': '僅顯示查詢歷史中的金鑰',
-        'clickToCopy': '點擊複製'
+        'clickToCopy': '點擊複製',
+        'overallHealth': '整體健康度',
+        'activeKeys': '活躍 Keys',
+        'usage24h': '24小時消耗',
+        'changedKeys24h': '24H 變動'
     },
     'ja': {
         'title': 'SiliconFlow 残高アシスタント',
@@ -364,7 +376,11 @@ const translations = {
         'overview': '概要',
         'historyViewMode': '履歴表示モード',
         'historyKeysOnly': 'クエリ履歴のキーのみ表示',
-        'clickToCopy': 'クリックしてコピー'
+        'clickToCopy': 'クリックしてコピー',
+        'overallHealth': '全体の健康度',
+        'activeKeys': '有効なキー',
+        'usage24h': '24時間の使用量',
+        'changedKeys24h': '24H 変動'
     }
 };
 

@@ -141,6 +141,7 @@ async function loadAllKeys() {
                 // No history keys, show empty state immediately
                 loadingState.classList.add('hidden');
                 emptyState.classList.remove('hidden');
+                updateOverviewStats(); // Update stats even if empty
                 return;
             }
 
@@ -176,6 +177,7 @@ async function loadAllKeys() {
         // Show empty state if no keys
         if (keysData.length === 0) {
             emptyState.classList.remove('hidden');
+            updateOverviewStats(); // Update stats even if empty
             return;
         }
 
@@ -227,8 +229,130 @@ function renderAllKeys() {
     if (typeof applyTranslations === 'function') {
         applyTranslations();
     }
+
+    // Update Header Overview Stats
+    updateOverviewStats();
 }
 
+/**
+ * Update the header overview stats (Health, Active Count, etc.)
+ */
+/**
+ * Update the header overview stats (Health, Active Count, etc.)
+ */
+function updateOverviewStats() {
+    if (!keysData || keysData.length === 0) {
+        document.getElementById('activeModelsCount').textContent = '0';
+        document.getElementById('healthText').textContent = '0%';
+        if (document.getElementById('healthCircle')) {
+            document.getElementById('healthCircle').setAttribute('stroke-dasharray', '0, 100');
+        }
+        document.getElementById('sessionUsageValue').textContent = '¥0.000';
+        return;
+    }
+
+    // 1. Active Models (Keys) - Only count keys with balance > 0
+    const activeCount = keysData.filter(k => parseFloat(k.current_balance) > 0).length;
+    document.getElementById('activeModelsCount').textContent = activeCount;
+
+    // 2. Overall Health (Average Percentage)
+    let totalPercentage = 0;
+    // For health calculation, maybe we still want to average all keys or just active ones?
+    // Usually "Overall Health" implies the health of the *account* or collection.
+    // If we only count active keys for the average, it might skew if we have many dead keys.
+    // Let's stick to averaging ALL keys for health to show true state, or just active?
+    // User didn't specify, but "Active Models" change suggests differentiating.
+    // Let's keep health average based on ALL keys for now as it reflects "System Health".
+    // Or if previous "Active Models" was just length, maybe health was based on length.
+    // Let's use keysData.length for average to be consistent with previous logic, 
+    // but update the Active Count display separately.
+
+    keysData.forEach(key => {
+        const stats = calculateStats(key);
+        totalPercentage += stats.percentage;
+    });
+
+    const avgHealth = keysData.length > 0 ? Math.round(totalPercentage / keysData.length) : 0;
+
+    document.getElementById('healthText').textContent = avgHealth + '%';
+
+    // Update Circle
+    const circle = document.getElementById('healthCircle');
+    const chart = document.getElementById('healthChart');
+    if (circle && chart) {
+        circle.setAttribute('stroke-dasharray', `${avgHealth}, 100`);
+
+        // Color logic
+        chart.classList.remove('green', 'orange', 'red');
+        if (avgHealth < 20) {
+            chart.classList.add('red');
+        } else if (avgHealth < 50) {
+            chart.classList.add('orange');
+        } else {
+            chart.classList.add('green');
+        }
+    }
+
+    // 3. 24H Usage & 4. 24H Changed Keys
+    let total24hUsage = 0;
+    let changedKeysCount = 0;
+    const now = Date.now();
+    const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
+    keysData.forEach(key => {
+        if (key.recent_history && Array.isArray(key.recent_history)) {
+            const currentBal = parseFloat(key.current_balance);
+
+            // Sort history (Ascending time)
+            const sortedHistory = [...key.recent_history].sort((a, b) => new Date(a.checked_at) - new Date(b.checked_at));
+            const targetTime = now - TWENTY_FOUR_HOURS;
+
+            let startBalance = currentBal;
+
+            // Logic: Find the record closest to 24h ago to determine start balance
+            const historyOldest = sortedHistory[0];
+
+            if (historyOldest) {
+                const oldestTime = new Date(historyOldest.checked_at).getTime();
+
+                // Default to oldest available if it's within the window (started tracking < 24h ago)
+                startBalance = parseFloat(historyOldest.balance);
+
+                // If we have data older than 24h, we look for the record closest to the 24h mark
+                if (oldestTime < targetTime) {
+                    for (let i = sortedHistory.length - 1; i >= 0; i--) {
+                        const rTime = new Date(sortedHistory[i].checked_at).getTime();
+
+                        if (rTime <= targetTime) {
+                            startBalance = parseFloat(sortedHistory[i].balance);
+                            break;
+                        }
+                    }
+                }
+
+                const usage = startBalance - currentBal;
+
+                // Add to total usage if positive (consumption)
+                if (usage > 0) {
+                    total24hUsage += usage;
+                }
+
+                // Count as changed if there is any significant difference (consumption or recharge)
+                if (Math.abs(startBalance - currentBal) > 0.000001) {
+                    changedKeysCount++;
+                }
+            }
+        }
+    });
+
+    document.getElementById('sessionUsageValue').textContent = '¥' + total24hUsage.toFixed(3);
+
+    // Update Changed Keys Count
+    const changedKeysEl = document.getElementById('changedKeysCount');
+    if (changedKeysEl) {
+        changedKeysEl.textContent = changedKeysCount;
+    }
+}
 /**
  * Create a single key card element
  */
@@ -254,7 +378,6 @@ function createKeyCard(keyData) {
         colorHex = '#f59e0b';
         bgClass = 'bg-orange';
     }
-
     // Status Logic
     const statusClasses = getStatusClass(keyData.account_status);
     const statusI18n = getStatusI18nKey(keyData.account_status);

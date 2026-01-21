@@ -91,41 +91,166 @@ body {
     transform: translateX(-2px);
 }
 
+/* Header Layout */
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.header-left {
+    flex: 1;
+}
+
 .header-title-group h1 {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 700;
-    color: #ffffff;
+    color: #a78bfa;
+    /* Light Purple for text */
     margin-bottom: 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.header-title-group .subtitle {
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* Refresh Countdown - inherits from style.css but may need positioning tweaks */
-.admin-header .refresh-countdown {
-    font-size: 12px;
-    font-weight: 500;
-    color: #ffffff;
-    font-variant-numeric: tabular-nums;
-    transition: all 0.3s ease;
-    padding: 6px 12px;
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    background: rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-    flex-shrink: 0;
+    gap: 12px;
+    text-shadow: 0 2px 10px rgba(167, 139, 250, 0.3);
+}
 
-    /* CRITICAL: Override absolute positioning from style.css */
+.title-icon {
+    width: 28px;
+    height: 28px;
+    color: #fb923c;
+    /* Orange for lightning */
+    fill: currentColor;
+    filter: drop-shadow(0 0 8px rgba(251, 146, 60, 0.5));
+}
+
+/* Header Overview Stats */
+.header-overview {
+    display: flex;
+    gap: 16px;
+    margin-left: auto;
+    /* Push to right */
+    margin-right: 20px;
+}
+
+.overview-card {
+    background: rgba(15, 23, 42, 0.6);
+    /* Darker background */
+    border: 1px solid var(--glass-border);
+    /* Subtle border */
+    border-radius: 16px;
+    padding: 12px 20px;
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.overview-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.overview-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    text-align: center;
+}
+
+/* Circular Chart for Health */
+.circular-chart-container {
+    width: 40px;
+    height: 40px;
     position: relative;
-    top: auto;
-    right: auto;
+    margin-bottom: 4px;
+}
+
+.circular-chart {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 3.8;
+}
+
+.circle {
+    fill: none;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    animation: progress 1s ease-out forwards;
+}
+
+.circular-chart.green .circle {
+    stroke: #10b981;
+}
+
+.circular-chart.orange .circle {
+    stroke: #f59e0b;
+}
+
+.circular-chart.red .circle {
+    stroke: #ef4444;
+}
+
+.percentage {
+    fill: #fff;
+    font-family: 'Inter', sans-serif;
+    font-weight: bold;
+    font-size: 10px;
+    text-anchor: middle;
+}
+
+/* Header Controls (Lang switch, Back button) */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.back-link-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.back-link-icon:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.back-link-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Refresh Countdown Positioning */
+.admin-header .refresh-countdown {
+    position: static;
+    /* Remove absolute positioning */
+    margin-bottom: 0;
+    background: var(--glass-bg);
 }
 
 .admin-header .refresh-countdown.warning {

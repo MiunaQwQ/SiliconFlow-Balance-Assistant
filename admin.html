@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Keys Dashboard - SiliconFlow</title>
+    <title>SiliconFlow Keys Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -24,18 +24,54 @@
         <header class="admin-header">
             <div class="header-content">
                 <div class="header-left">
-                    <a href="index.html" class="back-link">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        <span data-i18n="backToMain">Back</span>
-                    </a>
                     <div class="header-title-group">
-                        <h1 data-i18n="adminTitle">API Keys Dashboard</h1>
+                        <h1>
+                            <svg class="title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="currentColor">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                            </svg>
+                            SiliconFlow Keys Dashboard
+                        </h1>
                     </div>
                 </div>
-                <div class="header-right">
+
+                <div class="header-overview">
+                    <!-- Overall Health -->
+                    <div class="overview-card">
+                        <div class="circular-chart-container">
+                            <svg viewBox="0 0 36 36" class="circular-chart green" id="healthChart">
+                                <path class="circle-bg" d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="circle" id="healthCircle" stroke-dasharray="100, 100" d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <text x="18" y="20.35" class="percentage" id="healthText">100%</text>
+                            </svg>
+                        </div>
+                        <div class="overview-label" data-i18n="overallHealth">OVERALL HEALTH</div>
+                    </div>
+
+                    <!-- Active Keys -->
+                    <div class="overview-card">
+                        <div class="overview-value" id="activeModelsCount">0</div>
+                        <div class="overview-label" data-i18n="activeKeys">ACTIVE KEYS</div>
+                    </div>
+
+                    <!-- 24H Changed Keys -->
+                    <div class="overview-card">
+                        <div class="overview-value" id="changedKeysCount">0</div>
+                        <div class="overview-label" data-i18n="changedKeys24h">24H CHANGED</div>
+                    </div>
+
+                    <!-- 24H Usage -->
+                    <div class="overview-card">
+                        <div class="overview-value" id="sessionUsageValue">¥0.00</div>
+                        <div class="overview-label" data-i18n="usage24h">24H USAGE</div>
+                    </div>
+                </div>
+
+                <div class="header-controls"> <!-- Moved right controls here -->
                     <div class="refresh-countdown hidden" id="adminRefreshCountdown">
                         <span class="refresh-label" data-i18n="nextRefresh">Refresh:</span>
                         <span id="adminRefreshTimer">5:00</span>
@@ -53,6 +89,12 @@
                                 d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                         </svg>
                     </div>
+                    <a href="index.html" class="back-link-icon" title="Back">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </a>
                 </div>
             </div>
         </header>
