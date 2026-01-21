@@ -80,12 +80,12 @@ try {
         
         // Check if this decrypted key is in the history list
         if (in_array($decryptedKey, $historyKeys, true)) {
-            // Fetch recent history (last 30 minutes) for burn rate calculation
+            // Fetch recent history (last 24 hours) for usage calculation
             $recentHistoryQuery = "
                 SELECT balance, checked_at
                 FROM balance_history
                 WHERE tracked_key_id = :key_id
-                AND checked_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+                AND checked_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
                 ORDER BY checked_at ASC
             ";
             $recentHistory = $db->query($recentHistoryQuery, ['key_id' => $trackedKey['id']]);
