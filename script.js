@@ -955,19 +955,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         // Otherwise, we'll just update the existing instance with setOption
 
-        // Prepare data
-        const xAxisData = historyData.map(item => {
-            const date = new Date(item.checked_at);
-            return date.toLocaleString(getCurrentLanguage(), {
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            });
+        // Prepare data - use [timestamp, value] pairs for time axis
+        const seriesData = historyData.map(item => {
+            const timestamp = new Date(item.checked_at).getTime();
+            const balance = parseFloat(item.balance);
+            return [timestamp, balance];
         });
-
-        const seriesData = historyData.map(item => parseFloat(item.balance));
 
         // Calculate dataZoom range to focus on last 2 hours
         let dataZoomStart = 0;
@@ -1005,8 +998,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 formatter: function (params) {
                     if (params && params.length > 0) {
-                        const value = params[0].value;
-                        const timeLabel = params[0].name;
+                        const value = params[0].value[1]; // value is [timestamp, balance]
+                        const timestamp = params[0].value[0];
+                        const date = new Date(timestamp);
+                        const timeLabel = date.toLocaleString(getCurrentLanguage(), {
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        });
                         return `${timeLabel}<br/>${t('balance')}: ¥${value.toFixed(2)}`;
                     }
                     return '';
@@ -1068,9 +1069,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             ],
             xAxis: {
-                type: 'category',
+                type: 'time',
                 boundaryGap: false,
-                data: xAxisData,
                 axisLine: {
                     lineStyle: {
                         color: 'rgba(255, 255, 255, 0.2)'
@@ -1079,7 +1079,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 axisLabel: {
                     color: 'rgba(255, 255, 255, 0.6)',
                     rotate: 45,
-                    fontSize: 10
+                    fontSize: 10,
+                    formatter: function(value) {
+                        const date = new Date(value);
+                        return date.toLocaleString(getCurrentLanguage(), {
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        });
+                    }
                 }
             },
             yAxis: {
