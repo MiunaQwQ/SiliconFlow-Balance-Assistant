@@ -93,7 +93,12 @@ const translations = {
         'overallHealth': 'Overall Health',
         'activeKeys': 'Active Keys',
         'usage24h': '24H Usage',
-        'changedKeys24h': '24H Changed'
+        'changedKeys24h': '24H Changed',
+        'sortBy': 'Sort By',
+        'sortAddTime': 'Add Time',
+        'sortBalanceChange': 'Balance Change',
+        'sortRemainingBalance': 'Remaining Balance',
+        'toggleSortOrder': 'Toggle sort order'
     },
     'zh-CN': {
         'title': 'SiliconFlow 余额助手',
@@ -188,7 +193,12 @@ const translations = {
         'overallHealth': '整体健康度',
         'activeKeys': '活跃 Keys',
         'usage24h': '24小时消耗',
-        'changedKeys24h': '24H 变动'
+        'changedKeys24h': '24H 变动',
+        'sortBy': '排序方式',
+        'sortAddTime': '添加时间',
+        'sortBalanceChange': '余额变动时间',
+        'sortRemainingBalance': '剩余余额',
+        'toggleSortOrder': '切换排序顺序'
     },
     'zh-TW': {
         'title': 'SiliconFlow 餘額助手',
@@ -284,7 +294,12 @@ const translations = {
         'overallHealth': '整體健康度',
         'activeKeys': '活躍 Keys',
         'usage24h': '24小時消耗',
-        'changedKeys24h': '24H 變動'
+        'changedKeys24h': '24H 變動',
+        'sortBy': '排序方式',
+        'sortAddTime': '添加時間',
+        'sortBalanceChange': '餘額變動時間',
+        'sortRemainingBalance': '剩餘餘額',
+        'toggleSortOrder': '切換排序順序'
     },
     'ja': {
         'title': 'SiliconFlow 残高アシスタント',
@@ -380,7 +395,12 @@ const translations = {
         'overallHealth': '全体の健康度',
         'activeKeys': '有効なキー',
         'usage24h': '24時間の使用量',
-        'changedKeys24h': '24H 変動'
+        'changedKeys24h': '24H 変動',
+        'sortBy': '並べ替え',
+        'sortAddTime': '追加時間',
+        'sortBalanceChange': '残高変更時刻',
+        'sortRemainingBalance': '残高',
+        'toggleSortOrder': '並べ替え順序を切り替え'
     }
 };
 
@@ -412,6 +432,14 @@ function applyTranslations() {
                 // We should probably put data-i18n on the span.
                 element.textContent = translations[currentLang][key];
             }
+        }
+    });
+
+    // Handle title attributes (tooltips)
+    document.querySelectorAll('[data-i18n-title]').forEach(element => {
+        const key = element.getAttribute('data-i18n-title');
+        if (translations[currentLang][key]) {
+            element.title = translations[currentLang][key];
         }
     });
 

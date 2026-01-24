@@ -10,6 +10,10 @@ let countdownInterval = null;
 let REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds, can be dynamic
 let isHistoryViewMode = false; // Flag for history-view mode
 
+// Sort State
+let currentSortBy = 'add-time'; // Default sort by add time
+let currentSortOrder = 'desc'; // Default descending order
+
 // Initialize page
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
@@ -17,6 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'zh-CN';
     document.getElementById('langSelect').value = savedLang;
     await setLanguage(savedLang);
+
+    // Load saved sort preferences
+    loadSortPreferences();
 
     // Check if opened in history-view mode
     const urlParams = new URLSearchParams(window.location.search);
@@ -37,6 +44,8 @@ window.addEventListener('languageChanged', () => {
     if (keysData.length > 0) {
         renderAllKeys();
     }
+    // Update custom select UI when language changes
+    updateCustomSelectUI();
 });
 
 /**
@@ -182,6 +191,7 @@ async function loadAllKeys() {
         }
 
         // Render keys
+        sortKeysData();
         renderAllKeys();
         cardsGrid.classList.remove('hidden');
 
@@ -840,4 +850,248 @@ function updateCountdown() {
             countdownElement.classList.remove('warning');
         }
     }
+}
+
+/**
+ * Load sort preferences from localStorage
+ */
+function loadSortPreferences() {
+    const savedSortBy = localStorage.getItem('sf_admin_sort_by');
+    const savedSortOrder = localStorage.getItem('sf_admin_sort_order');
+
+    if (savedSortBy) {
+        currentSortBy = savedSortBy;
+    }
+    if (savedSortOrder) {
+        currentSortOrder = savedSortOrder;
+    }
+
+    // Update UI for custom select
+    updateCustomSelectUI();
+
+    // Update sort order button
+    const sortOrderBtn = document.getElementById('sortOrderBtn');
+    if (sortOrderBtn) {
+        sortOrderBtn.className = currentSortOrder;
+    }
+}
+
+/**
+ * Update custom select UI to reflect current sort
+ */
+function updateCustomSelectUI() {
+    const selectValue = document.querySelector('.select-value');
+    const options = document.querySelectorAll('.select-option');
+
+    if (!selectValue) return;
+
+    // Update selected option styling
+    options.forEach(option => {
+        const value = option.getAttribute('data-value');
+        if (value === currentSortBy) {
+            option.classList.add('selected');
+            // Update trigger text with translated content
+            const i18nKey = option.getAttribute('data-i18n');
+            if (i18nKey) {
+                // Important: Set the data-i18n attribute so translation system can update it
+                selectValue.setAttribute('data-i18n', i18nKey);
+                // Update text content immediately
+                if (typeof t === 'function') {
+                    selectValue.textContent = t(i18nKey);
+                } else {
+                    selectValue.textContent = option.textContent;
+                }
+            } else {
+                selectValue.textContent = option.textContent;
+            }
+        } else {
+            option.classList.remove('selected');
+        }
+    });
+}
+
+/**
+ * Toggle custom sort dropdown
+ */
+function toggleSortDropdown() {
+    const customSelect = document.getElementById('customSortSelect');
+    if (!customSelect) return;
+
+    const isOpen = customSelect.classList.contains('open');
+
+    // Close all other dropdowns first
+    document.querySelectorAll('.custom-select.open').forEach(select => {
+        if (select !== customSelect) {
+            select.classList.remove('open');
+        }
+    });
+
+    // Toggle this dropdown
+    customSelect.classList.toggle('open');
+
+    // If opening, add click listener to close when clicking outside
+    if (!isOpen) {
+        setTimeout(() => {
+            document.addEventListener('click', closeDropdownOnClickOutside);
+        }, 0);
+    }
+}
+
+/**
+ * Close dropdown when clicking outside
+ */
+function closeDropdownOnClickOutside(event) {
+    const customSelect = document.getElementById('customSortSelect');
+    if (!customSelect) return;
+
+    if (!customSelect.contains(event.target)) {
+        customSelect.classList.remove('open');
+        document.removeEventListener('click', closeDropdownOnClickOutside);
+    }
+}
+
+/**
+ * Select a sort option from custom dropdown
+ */
+function selectSortOption(value) {
+    currentSortBy = value;
+
+    // Update UI
+    updateCustomSelectUI();
+
+    // Close dropdown
+    const customSelect = document.getElementById('customSortSelect');
+    if (customSelect) {
+        customSelect.classList.remove('open');
+    }
+    document.removeEventListener('click', closeDropdownOnClickOutside);
+
+    // Save preference
+    localStorage.setItem('sf_admin_sort_by', currentSortBy);
+
+    // Re-sort and render
+    sortKeysData();
+    renderAllKeys();
+}
+
+/**
+ * Update sort criteria (kept for compatibility, now uses custom select)
+ */
+function updateSort() {
+    // This function is now handled by selectSortOption
+    // Keeping it for backward compatibility
+}
+
+/**
+ * Update sort criteria
+ */
+function updateSort() {
+    const sortSelect = document.getElementById('sortSelect');
+    currentSortBy = sortSelect.value;
+
+    // Save preference
+    localStorage.setItem('sf_admin_sort_by', currentSortBy);
+
+    // Re-sort and render
+    sortKeysData();
+    renderAllKeys();
+}
+
+/**
+ * Toggle sort order between ascending and descending
+ */
+function toggleSortOrder() {
+    const sortOrderBtn = document.getElementById('sortOrderBtn');
+
+    // Toggle order
+    currentSortOrder = currentSortOrder === 'desc' ? 'asc' : 'desc';
+
+    // Update button class for animation
+    sortOrderBtn.className = currentSortOrder;
+
+    // Save preference
+    localStorage.setItem('sf_admin_sort_order', currentSortOrder);
+
+    // Re-sort and render
+    sortKeysData();
+    renderAllKeys();
+}
+
+/**
+ * Sort keysData array based on current sort settings
+ */
+function sortKeysData() {
+    if (!keysData || keysData.length === 0) return;
+
+    keysData.sort((a, b) => {
+        let valueA, valueB;
+
+        switch (currentSortBy) {
+            case 'add-time':
+                // Sort by initial check time or created_at
+                valueA = new Date(a.initial_check_time || a.created_at || 0).getTime();
+                valueB = new Date(b.initial_check_time || b.created_at || 0).getTime();
+                break;
+
+            case 'balance-change-time':
+                // Sort by ACTUAL balance change time, not just last check time
+                valueA = getLastBalanceChangeTime(a);
+                valueB = getLastBalanceChangeTime(b);
+                break;
+
+            case 'remaining-balance':
+                // Sort by current balance
+                valueA = parseFloat(a.current_balance) || 0;
+                valueB = parseFloat(b.current_balance) || 0;
+                break;
+
+            default:
+                return 0;
+        }
+
+        // Apply sort order
+        if (currentSortOrder === 'asc') {
+            return valueA - valueB;
+        } else {
+            return valueB - valueA;
+        }
+    });
+}
+
+/**
+ * Get the last time when balance actually changed (not just checked)
+ * @param {Object} keyData - The key data object
+ * @returns {number} - Timestamp of last balance change, or 0 if no change detected
+ */
+function getLastBalanceChangeTime(keyData) {
+    // If no history, use last_update as fallback
+    if (!keyData.recent_history || !Array.isArray(keyData.recent_history) || keyData.recent_history.length < 2) {
+        return new Date(keyData.last_update || keyData.last_checked_at || 0).getTime();
+    }
+
+    const currentBalance = parseFloat(keyData.current_balance);
+    const history = [...keyData.recent_history].sort((a, b) =>
+        new Date(b.checked_at).getTime() - new Date(a.checked_at).getTime()
+    ); // Sort descending (newest first)
+
+    // Find the most recent record where balance is different from current
+    for (let i = 0; i < history.length; i++) {
+        const recordBalance = parseFloat(history[i].balance);
+
+        // If this record has different balance than current, this is when change happened
+        if (Math.abs(recordBalance - currentBalance) > 0.000001) {
+            // The change happened between this record and the next newer one
+            // Return the timestamp of the next record (when the new balance was first recorded)
+            if (i > 0) {
+                return new Date(history[i - 1].checked_at).getTime();
+            } else {
+                // Current balance is newest, use last_update
+                return new Date(keyData.last_update || keyData.last_checked_at || 0).getTime();
+            }
+        }
+    }
+
+    // If all history records have same balance as current, no change detected
+    // Use the oldest record time (balance has been stable)
+    return new Date(history[history.length - 1].checked_at).getTime();
 }

@@ -76,6 +76,36 @@
                         <span class="refresh-label" data-i18n="nextRefresh">Refresh:</span>
                         <span id="adminRefreshTimer">5:00</span>
                     </div>
+                    <div class="sort-controls">
+                        <div class="custom-select" id="customSortSelect">
+                            <div class="select-trigger" onclick="toggleSortDropdown()">
+                                <span class="select-value" data-i18n="sortAddTime">Add Time</span>
+                                <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                            <div class="select-options" id="sortOptions">
+                                <div class="select-option" data-value="add-time" data-i18n="sortAddTime"
+                                    onclick="selectSortOption('add-time')">Add Time</div>
+                                <div class="select-option" data-value="balance-change-time"
+                                    data-i18n="sortBalanceChange" onclick="selectSortOption('balance-change-time')">
+                                    Balance Change</div>
+                                <div class="select-option" data-value="remaining-balance"
+                                    data-i18n="sortRemainingBalance" onclick="selectSortOption('remaining-balance')">
+                                    Remaining Balance</div>
+                            </div>
+                        </div>
+                        <button id="sortOrderBtn" class="desc" onclick="toggleSortOrder()" title="Toggle sort order"
+                            data-i18n-title="toggleSortOrder">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    </div>
                     <div class="lang-switch">
                         <select id="langSelect" onchange="setLanguage(this.value)">
                             <option value="zh-CN">简体中文</option>
