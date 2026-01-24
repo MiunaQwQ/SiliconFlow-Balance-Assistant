@@ -18,7 +18,7 @@ let currentSortOrder = 'desc'; // Default descending order
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize i18n
-    const savedLang = localStorage.getItem('selectedLanguage') || 'zh-CN';
+    const savedLang = localStorage.getItem('sf_lang') || 'zh-CN';
     document.getElementById('langSelect').value = savedLang;
     await setLanguage(savedLang);
 
