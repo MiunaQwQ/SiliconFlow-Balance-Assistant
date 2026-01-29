@@ -1147,10 +1147,24 @@ button:disabled {
 .chart-title {
     font-size: 18px;
     font-weight: 600;
-    margin-bottom: 20px;
+    font-weight: 600;
     color: #fff;
     display: flex;
     align-items: center;
+    margin-bottom: 0;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.chart-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .chart-title::before {
@@ -1164,15 +1178,12 @@ button:disabled {
 }
 
 .refresh-countdown {
-    position: absolute;
-    top: 20px;
-    /* Aligned slightly higher to match header visual center */
-    right: 24px;
+    /* Restore missing font properties */
     font-size: 12px;
     font-weight: 500;
     color: var(--text-secondary);
     font-family: 'Inter', sans-serif;
-    /* Switch to Sans for cleaner look, or keep mono if preferred for digits. Let's use tabular nums if possible */
+
     font-variant-numeric: tabular-nums;
     transition: all 0.3s ease;
 
@@ -1184,15 +1195,122 @@ button:disabled {
     display: flex;
     align-items: center;
     gap: 6px;
+
+    /* Removed absolute positioning */
 }
 
 /* Optional: Add a small icon via CSS before? Or just keep text clean. Let's keep it text for now but maybe add a label or icon if requested later. */
+
 
 .refresh-countdown.warning {
     color: var(--warning-color);
     border-color: rgba(245, 158, 11, 0.3);
     /* Warning color with opacity */
     background: rgba(245, 158, 11, 0.1);
+}
+
+/* History Range Selector */
+/* Custom Select Dropdown (Ported from admin.css) */
+.custom-select {
+    position: relative;
+    min-width: 120px;
+    user-select: none;
+}
+
+.select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    /* Matches other controls */
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    gap: 8px;
+    height: 32px;
+    /* Match countdown height */
+    font-family: 'Inter', sans-serif;
+}
+
+.select-trigger:hover {
+    background: rgba(0, 0, 0, 0.4);
+    color: #fff;
+    border-color: var(--accent-color);
+}
+
+.custom-select.open .select-trigger {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
+    color: #fff;
+}
+
+.select-value {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.select-arrow {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+    color: inherit;
+}
+
+.custom-select.open .select-arrow {
+    transform: rotate(180deg);
+}
+
+.select-options {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.custom-select.open .select-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.select-option {
+    padding: 8px 12px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-left: 2px solid transparent;
+}
+
+.select-option:hover {
+    background: rgba(167, 139, 250, 0.15);
+    border-left-color: var(--accent-color);
+    color: #fff;
+}
+
+.select-option.selected {
+    background: rgba(167, 139, 250, 0.2);
+    border-left-color: var(--accent-color);
+    color: #a78bfa;
 }
 
 

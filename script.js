@@ -171,6 +171,111 @@ document.addEventListener('DOMContentLoaded', () => {
         updateHistoryDisplay();
     });
 
+    // Custom History Range Dropdown Logic
+    function toggleHistoryDropdown() {
+        const dropdown = document.getElementById('historyRangeSelect');
+        if (dropdown) {
+            dropdown.classList.toggle('open');
+        }
+    }
+
+    // Initialize history range from localStorage
+    function initHistoryRange() {
+        const savedRange = localStorage.getItem('sf_history_range');
+        if (savedRange && ['1', '3', '7', '30'].includes(savedRange)) {
+            // Find the option
+            const option = document.querySelector(`#historyOptions .select-option[data-value="${savedRange}"]`);
+            if (option) {
+                // Update UI without triggering load (load happens later)
+                // We manually call the variables update part of selectHistoryOption
+                // or just simulate a click?
+                // Better to refactor. Let's just manually update DOM.
+
+                // Update Value Display
+                const valueDisplay = document.getElementById('historyRangeValue');
+                if (valueDisplay) {
+                    const i18nKey = option.getAttribute('data-i18n');
+                    const label = (typeof t === 'function') ? t(i18nKey) : (translations['en'][i18nKey] || option.textContent);
+                    valueDisplay.textContent = label;
+                    valueDisplay.setAttribute('data-i18n', i18nKey);
+                }
+
+                // Update selected class
+                document.querySelectorAll('#historyOptions .select-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                option.classList.add('selected');
+
+                console.log('Restored history range:', savedRange);
+            }
+        }
+    }
+
+    // Call init on load
+    document.addEventListener('DOMContentLoaded', initHistoryRange);
+    // Also listen for language change to re-update the label of selected item
+    window.addEventListener('languageChanged', () => {
+        const selectedOption = document.querySelector('#historyOptions .select-option.selected');
+        if (selectedOption) {
+            const valueDisplay = document.getElementById('historyRangeValue');
+            if (valueDisplay) {
+                const i18nKey = selectedOption.getAttribute('data-i18n');
+                if (typeof t === 'function') {
+                    valueDisplay.textContent = t(i18nKey);
+                }
+            }
+        }
+    });
+
+    function selectHistoryOption(value, i18nKey) {
+        console.log('Selecting history option:', value);
+
+        // Save to localStorage
+        localStorage.setItem('sf_history_range', value);
+
+        // Update value display
+        const valueDisplay = document.getElementById('historyRangeValue');
+        if (valueDisplay) {
+            // Check if t() function exists (from i18n.js), otherwise fallback
+            const label = (typeof t === 'function') ? t(i18nKey) : translations['en'][i18nKey];
+            valueDisplay.textContent = label;
+            valueDisplay.setAttribute('data-i18n', i18nKey);
+        }
+
+        // Update selected state in options
+        const options = document.querySelectorAll('#historyOptions .select-option');
+        options.forEach(opt => {
+            if (opt.dataset.value === value) {
+                opt.classList.add('selected');
+            } else {
+                opt.classList.remove('selected');
+            }
+        });
+
+        // Close dropdown
+        const dropdown = document.getElementById('historyRangeSelect');
+        if (dropdown) {
+            dropdown.classList.remove('open');
+        }
+
+        // Trigger load
+        if (currentApiKey) {
+            loadBalanceHistory(currentApiKey, value);
+        }
+    }
+
+    // Expose functions to global scope for onclick handlers
+    window.toggleHistoryDropdown = toggleHistoryDropdown;
+    window.selectHistoryOption = selectHistoryOption;
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('historyRangeSelect');
+        if (dropdown && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('open');
+        }
+    });
+
     // Save query to history
     function saveQueryHistory(apiKey) {
         // Check if history recording is enabled
@@ -739,7 +844,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function loadBalanceHistory(apiKey, days = 7) {
+    async function loadBalanceHistory(apiKey, days = null) {
+        // If days not specified, use selected value or default to 1 (24h)
+        if (!days) {
+            const selectedOption = document.querySelector('#historyOptions .select-option.selected');
+            days = selectedOption ? selectedOption.dataset.value : 1;
+        }
         try {
             const response = await fetch(`${BACKEND_URL}/get_history.php?api_key=${encodeURIComponent(apiKey)}&days=${days}`);
             const result = await response.json();
@@ -1080,7 +1190,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     color: 'rgba(255, 255, 255, 0.6)',
                     rotate: 45,
                     fontSize: 10,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         const date = new Date(value);
                         return date.toLocaleString(getCurrentLanguage(), {
                             month: '2-digit',

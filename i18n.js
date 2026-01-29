@@ -39,6 +39,10 @@ const translations = {
         'safe': 'Safe',
         'lessThan24h': '< 24h',
         'lessThan3d': '< 3d',
+        'span24h': '24 Hours',
+        'span3d': '3 Days',
+        'span7d': '7 Days',
+        'span30d': '30 Days',
         'sessionUsed': 'Total Used',
 
         'keyStatus': 'Key Status',
@@ -140,6 +144,10 @@ const translations = {
         'safe': '安全',
         'lessThan24h': '< 24小时',
         'lessThan3d': '< 3天',
+        'span24h': '24 小时',
+        'span3d': '3 天',
+        'span7d': '7 天',
+        'span30d': '30 天',
         'sessionUsed': '累计消耗',
 
         'keyStatus': 'Key 状态',
@@ -240,6 +248,10 @@ const translations = {
         'safe': '安全',
         'lessThan24h': '< 24小時',
         'lessThan3d': '< 3天',
+        'span24h': '24 小時',
+        'span3d': '3 天',
+        'span7d': '7 天',
+        'span30d': '30 天',
         'sessionUsed': '累計消耗',
 
         'keyStatus': 'Key 狀態',
@@ -341,6 +353,10 @@ const translations = {
         'safe': '安全',
         'lessThan24h': '< 24時間',
         'lessThan3d': '< 3日',
+        'span24h': '24 時間',
+        'span3d': '3 日',
+        'span7d': '7 日',
+        'span30d': '30 日',
         'sessionUsed': '累積消費',
 
         'keyStatus': 'Key ステータス',
