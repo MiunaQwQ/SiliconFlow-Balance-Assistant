@@ -1,0 +1,402 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SiliconFlow Balance Assistant API",
+    "version": "1.0.0",
+    "description": "API documentation generated from backend PHP endpoints. 接口文档（简体中文）"
+  },
+  "servers": [
+    {
+      "url": "http://localhost",
+      "description": "Local development"
+    }
+  ],
+  "tags": [
+    { "name": "Tracking", "description": "密钥跟踪管理" },
+    { "name": "Batch", "description": "定时批量检查" },
+    { "name": "History", "description": "历史与查询记录" },
+    { "name": "Models", "description": "模型列表代理" },
+    { "name": "Admin", "description": "管理员接口" }
+  ],
+  "paths": {
+    "/backend/api/track_key.php": {
+      "post": {
+        "tags": ["Tracking"],
+        "summary": "跟踪密钥操作",
+        "description": "使用 action=add/remove 管理跟踪。",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["add", "remove"]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "api_key": { "type": "string" },
+                  "tracked_key_id": { "type": "integer" },
+                  "user_id": { "type": "string" },
+                  "user_email": { "type": "string", "format": "email" }
+                },
+                "required": ["api_key"],
+                "description": "action=remove 时可提供 api_key 或 tracked_key_id。"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      },
+      "get": {
+        "tags": ["Tracking"],
+        "summary": "查询跟踪状态",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["status"]
+            }
+          },
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "状态",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/backend/api/batch_check.php": {
+      "get": {
+        "tags": ["Batch"],
+        "summary": "执行批量检查",
+        "description": "用于 Cron 或计划任务调用。",
+        "responses": {
+          "200": {
+            "description": "批量结果",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/backend/api/get_history.php": {
+      "get": {
+        "tags": ["History"],
+        "summary": "获取余额历史",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "maximum": 90 }
+          },
+          {
+            "name": "hours",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "maximum": 168 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "历史数据",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/backend/api/get_latest_balance.php": {
+      "get": {
+        "tags": ["History"],
+        "summary": "获取最新余额",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "最新余额",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "403": { "$ref": "#/components/responses/ErrorResponse" },
+          "404": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/backend/api/get_all_keys.php": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "获取所有跟踪密钥",
+        "description": "需要管理员会话 Cookie。",
+        "responses": {
+          "200": {
+            "description": "全部密钥",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/backend/api/get_history_keys.php": {
+      "post": {
+        "tags": ["History"],
+        "summary": "按历史列表获取密钥",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "keys": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                },
+                "required": ["keys"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "匹配到的密钥",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/backend/api/get_models.php": {
+      "get": {
+        "tags": ["Models"],
+        "summary": "获取支持的模型",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "sub_type",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "模型列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": { "type": "array", "items": { "type": "object" } },
+                    "total": { "type": "integer" },
+                    "code": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/backend/api/save_query.php": {
+      "post": {
+        "tags": ["History"],
+        "summary": "保存查询记录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "api_key": { "type": "string" },
+                  "balance": { "type": "number" },
+                  "status": { "type": "string" },
+                  "user_id": { "type": "string" },
+                  "user_email": { "type": "string", "format": "email" }
+                },
+                "required": ["api_key", "balance"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "已保存",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/backend/api/login.php": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "管理员登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": { "type": "string" }
+                },
+                "required": ["password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录结果",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/backend/api/check_auth.php": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "检查管理员会话",
+        "responses": {
+          "200": {
+            "description": "认证状态",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": "string" },
+          "data": { "type": "object" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": "string" },
+          "data": { "type": "object" }
+        }
+      }
+    },
+    "responses": {
+      "ErrorResponse": {
+        "description": "错误",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+          }
+        }
+      }
+    }
+  }
+}
