@@ -28,6 +28,7 @@
                         <h1>
                             <svg class="title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                 fill="currentColor">
+                                <title>Dashboard</title>
                                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                             </svg>
                             SiliconFlow Keys Dashboard
@@ -40,6 +41,7 @@
                     <div class="overview-card">
                         <div class="circular-chart-container">
                             <svg viewBox="0 0 36 36" class="circular-chart green" id="healthChart">
+                                <title>Health chart</title>
                                 <path class="circle-bg" d="M18 2.0845
                                     a 15.9155 15.9155 0 0 1 0 31.831
                                     a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -82,6 +84,7 @@
                                 <span class="select-value" data-i18n="sortAddTime">Add Time</span>
                                 <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
+                                    <title>Arrow</title>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
@@ -97,10 +100,11 @@
                                     Remaining Balance</div>
                             </div>
                         </div>
-                        <button id="sortOrderBtn" class="desc" onclick="toggleSortOrder()" title="Toggle sort order"
+                        <button id="sortOrderBtn" type="button" class="desc" onclick="toggleSortOrder()" title="Toggle sort order"
                             data-i18n-title="toggleSortOrder">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
+                                <title>Sort</title>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
@@ -115,12 +119,14 @@
                         </select>
                         <svg class="lang-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
+                            <title>Language</title>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                         </svg>
                     </div>
                     <a href="index.html" class="back-link-icon" title="Back">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <title>Back</title>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
@@ -128,6 +134,38 @@
                 </div>
             </div>
         </header>
+
+        <section class="bulk-import-panel" id="bulkImportPanel">
+            <div class="bulk-import-header">
+                <h2 data-i18n="bulkImportTitle">Bulk Import API Keys</h2>
+                <p data-i18n="bulkImportHint">One key per line, comma or space separated</p>
+            </div>
+
+            <div class="bulk-import-body">
+                <textarea id="bulkKeysInput" class="bulk-keys-input" data-i18n-placeholder="bulkImportPlaceholder"
+                    placeholder="sk-xxx\nsk-yyy"></textarea>
+
+                <div class="bulk-options-row">
+                    <label class="bulk-option-item" for="bulkSaveToServer">
+                        <input type="checkbox" id="bulkSaveToServer" checked>
+                        <span data-i18n="bulkSaveToServer">Save to server</span>
+                    </label>
+                    <label class="bulk-option-item" for="bulkTrackKeys">
+                        <input type="checkbox" id="bulkTrackKeys" checked>
+                        <span data-i18n="bulkTrackKeys">Track keys</span>
+                    </label>
+                </div>
+
+                <div class="bulk-actions-row">
+                    <button id="bulkImportBtn" type="button" class="bulk-action-btn primary" onclick="handleBulkImport()"
+                        data-i18n="bulkImportBtn">Import</button>
+                    <button id="bulkClearBtn" type="button" class="bulk-action-btn" onclick="clearBulkImportForm()"
+                        data-i18n="bulkClearBtn">Clear</button>
+                </div>
+
+                <div class="bulk-result" id="bulkImportResult"></div>
+            </div>
+        </section>
 
         <!-- Loading State -->
         <div id="loadingState" class="loading-state">
@@ -139,6 +177,7 @@
         <div id="emptyState" class="empty-state hidden">
             <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
+                <title>Empty</title>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
@@ -147,6 +186,7 @@
             <a href="index.html" class="cta-button">
                 <span data-i18n="goToMain">Go to Main Page</span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <title>Go</title>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
@@ -157,13 +197,15 @@
         <div id="errorState" class="error-state hidden">
             <svg xmlns="http://www.w3.org/2000/svg" class="error-icon" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
+                <title>Error</title>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <h3 data-i18n="errorLoadingKeys">Failed to load keys</h3>
             <p id="errorMessage">An error occurred while loading the data</p>
-            <button onclick="location.reload()" class="cta-button">
+            <button type="button" onclick="location.reload()" class="cta-button">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <title>Retry</title>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
@@ -185,7 +227,7 @@
                             onkeypress="if(event.key === 'Enter') handleLogin()">
                     </div>
                     <p id="loginError" class="login-error hidden">Invalid password</p>
-                    <button onclick="handleLogin()" class="login-btn">
+                    <button type="button" onclick="handleLogin()" class="login-btn">
                         <span>Login</span>
                         <div id="loginSpinner" class="spinner-small hidden"></div>
                     </button>
@@ -202,6 +244,7 @@
     <div id="toast" class="toast">
         <svg xmlns="http://www.w3.org/2000/svg" class="toast-icon" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
+            <title>Success</title>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
         <span id="toastMessage">Notification</span>

@@ -102,7 +102,19 @@ const translations = {
         'sortAddTime': 'Add Time',
         'sortBalanceChange': 'Balance Change',
         'sortRemainingBalance': 'Remaining Balance',
-        'toggleSortOrder': 'Toggle sort order'
+        'toggleSortOrder': 'Toggle sort order',
+        'bulkImportTitle': 'Bulk Import API Keys',
+        'bulkImportHint': 'One key per line, comma or space separated',
+        'bulkImportPlaceholder': 'Paste keys here. Example: sk-xxx',
+        'bulkSaveToServer': 'Save to server',
+        'bulkTrackKeys': 'Track keys',
+        'bulkImportBtn': 'Import',
+        'bulkClearBtn': 'Clear',
+        'bulkImportEmpty': 'Please input at least one key',
+        'bulkImportProcessing': 'Importing...',
+        'bulkImportSummary': 'Imported: {0}, Failed: {1}',
+        'bulkImportFailedItems': 'Failed items:',
+        'bulkImportError': 'Bulk import failed'
     },
     'zh-CN': {
         'title': 'SiliconFlow 余额助手',
@@ -206,7 +218,19 @@ const translations = {
         'sortAddTime': '添加时间',
         'sortBalanceChange': '余额变动时间',
         'sortRemainingBalance': '剩余余额',
-        'toggleSortOrder': '切换排序顺序'
+        'toggleSortOrder': '切换排序顺序',
+        'bulkImportTitle': '批量录入 API Key',
+        'bulkImportHint': '支持每行一个，或用逗号/空格分隔',
+        'bulkImportPlaceholder': '在此粘贴 Key，例如：sk-xxx',
+        'bulkSaveToServer': '保存到服务器',
+        'bulkTrackKeys': '追踪 KEY',
+        'bulkImportBtn': '开始录入',
+        'bulkClearBtn': '清空',
+        'bulkImportEmpty': '请至少输入一个 Key',
+        'bulkImportProcessing': '批量录入中...',
+        'bulkImportSummary': '成功: {0}，失败: {1}',
+        'bulkImportFailedItems': '失败项：',
+        'bulkImportError': '批量录入失败'
     },
     'zh-TW': {
         'title': 'SiliconFlow 餘額助手',
@@ -311,7 +335,19 @@ const translations = {
         'sortAddTime': '添加時間',
         'sortBalanceChange': '餘額變動時間',
         'sortRemainingBalance': '剩餘餘額',
-        'toggleSortOrder': '切換排序順序'
+        'toggleSortOrder': '切換排序順序',
+        'bulkImportTitle': '批量匯入 API Key',
+        'bulkImportHint': '支援每行一個，或以逗號/空格分隔',
+        'bulkImportPlaceholder': '在此貼上 Key，例如：sk-xxx',
+        'bulkSaveToServer': '保存到伺服器',
+        'bulkTrackKeys': '追蹤 KEY',
+        'bulkImportBtn': '開始匯入',
+        'bulkClearBtn': '清空',
+        'bulkImportEmpty': '請至少輸入一個 Key',
+        'bulkImportProcessing': '批量匯入中...',
+        'bulkImportSummary': '成功: {0}，失敗: {1}',
+        'bulkImportFailedItems': '失敗項目：',
+        'bulkImportError': '批量匯入失敗'
     },
     'ja': {
         'title': 'SiliconFlow 残高アシスタント',
@@ -416,7 +452,19 @@ const translations = {
         'sortAddTime': '追加時間',
         'sortBalanceChange': '残高変更時刻',
         'sortRemainingBalance': '残高',
-        'toggleSortOrder': '並べ替え順序を切り替え'
+        'toggleSortOrder': '並べ替え順序を切り替え',
+        'bulkImportTitle': 'APIキーを一括登録',
+        'bulkImportHint': '1行1キー、またはカンマ/空白区切りに対応',
+        'bulkImportPlaceholder': 'ここにキーを貼り付け（例: sk-xxx）',
+        'bulkSaveToServer': 'サーバーに保存',
+        'bulkTrackKeys': 'キーを追跡',
+        'bulkImportBtn': '登録',
+        'bulkClearBtn': 'クリア',
+        'bulkImportEmpty': '少なくとも1つのキーを入力してください',
+        'bulkImportProcessing': '一括登録中...',
+        'bulkImportSummary': '成功: {0}、失敗: {1}',
+        'bulkImportFailedItems': '失敗項目:',
+        'bulkImportError': '一括登録に失敗しました'
     }
 };
 
@@ -456,6 +504,13 @@ function applyTranslations() {
         const key = element.getAttribute('data-i18n-title');
         if (translations[currentLang][key]) {
             element.title = translations[currentLang][key];
+        }
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        if (translations[currentLang][key]) {
+            element.placeholder = translations[currentLang][key];
         }
     });
 

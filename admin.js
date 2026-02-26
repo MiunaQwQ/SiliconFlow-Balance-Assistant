@@ -14,6 +14,9 @@ let isHistoryViewMode = false; // Flag for history-view mode
 let currentSortBy = 'add-time'; // Default sort by add time
 let currentSortOrder = 'desc'; // Default descending order
 
+const BULK_IMPORT_DEFAULT_USER_ID = 'admin-bulk';
+const BULK_IMPORT_DEFAULT_EMAIL = 'admin-bulk@local';
+
 // Initialize page
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
@@ -37,7 +40,163 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Check Auth normally
         checkAuth();
     }
+
+    bindBulkImportEvents();
 });
+
+function bindBulkImportEvents() {
+    const bulkTrackKeys = document.getElementById('bulkTrackKeys');
+    const bulkSaveToServer = document.getElementById('bulkSaveToServer');
+
+    if (!bulkTrackKeys || !bulkSaveToServer) {
+        return;
+    }
+
+    if (bulkTrackKeys.checked) {
+        bulkSaveToServer.checked = true;
+        bulkSaveToServer.disabled = true;
+    }
+
+    bulkTrackKeys.addEventListener('change', (event) => {
+        if (event.target.checked) {
+            bulkSaveToServer.checked = true;
+            bulkSaveToServer.disabled = true;
+            return;
+        }
+
+        bulkSaveToServer.disabled = false;
+    });
+}
+
+function parseBulkKeys(rawInput) {
+    if (!rawInput) {
+        return [];
+    }
+
+    const segments = rawInput
+        .split(/[\n,\s]+/)
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
+
+    const unique = [];
+    const seen = new Set();
+
+    segments.forEach((key) => {
+        if (!seen.has(key)) {
+            unique.push(key);
+            seen.add(key);
+        }
+    });
+
+    return unique;
+}
+
+function setBulkImportResult(message, type = '') {
+    const resultNode = document.getElementById('bulkImportResult');
+    if (!resultNode) {
+        return;
+    }
+
+    resultNode.className = 'bulk-result';
+    if (type) {
+        resultNode.classList.add(type);
+    }
+    resultNode.textContent = message;
+}
+
+function clearBulkImportForm() {
+    const input = document.getElementById('bulkKeysInput');
+    const bulkSaveToServer = document.getElementById('bulkSaveToServer');
+    const bulkTrackKeys = document.getElementById('bulkTrackKeys');
+
+    if (input) {
+        input.value = '';
+    }
+
+    if (bulkTrackKeys) {
+        bulkTrackKeys.checked = true;
+    }
+
+    if (bulkSaveToServer) {
+        bulkSaveToServer.checked = true;
+        bulkSaveToServer.disabled = true;
+    }
+
+    setBulkImportResult('');
+}
+
+async function handleBulkImport() {
+    const input = document.getElementById('bulkKeysInput');
+    const importBtn = document.getElementById('bulkImportBtn');
+    const bulkSaveToServer = document.getElementById('bulkSaveToServer');
+    const bulkTrackKeys = document.getElementById('bulkTrackKeys');
+
+    if (!input || !importBtn || !bulkSaveToServer || !bulkTrackKeys) {
+        return;
+    }
+
+    const keys = parseBulkKeys(input.value);
+    if (keys.length === 0) {
+        setBulkImportResult(t('bulkImportEmpty') || 'Please input at least one key', 'error');
+        return;
+    }
+
+    importBtn.disabled = true;
+    const originalButtonText = importBtn.textContent;
+    importBtn.textContent = t('bulkImportProcessing') || 'Importing...';
+    setBulkImportResult((t('bulkImportProcessing') || 'Importing...') + ` (${keys.length})`);
+
+    try {
+        const payload = {
+            keys,
+            save_to_server: bulkSaveToServer.checked,
+            track_keys: bulkTrackKeys.checked,
+            user_id: BULK_IMPORT_DEFAULT_USER_ID,
+            user_email: BULK_IMPORT_DEFAULT_EMAIL
+        };
+
+        const response = await fetch('backend/api/bulk_import_keys.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.message || 'Bulk import failed');
+        }
+
+        const summary = result.data || {};
+        const successCount = Number(summary.success_count || 0);
+        const failedCount = Number(summary.failed_count || 0);
+
+        const successLine = (t('bulkImportSummary') || 'Imported: {0}, Failed: {1}')
+            .replace('{0}', successCount)
+            .replace('{1}', failedCount);
+
+        if (failedCount > 0 && Array.isArray(summary.results)) {
+            const failedMessages = summary.results
+                .filter(item => item.success === false)
+                .slice(0, 5)
+                .map(item => `${item.key}: ${item.message || 'failed'}`);
+
+            const failPrefix = t('bulkImportFailedItems') || 'Failed items:';
+            setBulkImportResult(`${successLine}\n${failPrefix}\n${failedMessages.join('\n')}`, 'error');
+        } else {
+            setBulkImportResult(successLine, 'success');
+        }
+
+        await loadAllKeys();
+    } catch (error) {
+        console.error('Bulk import error:', error);
+        setBulkImportResult(error.message || (t('bulkImportError') || 'Bulk import failed'), 'error');
+    } finally {
+        importBtn.disabled = false;
+        importBtn.textContent = originalButtonText;
+    }
+}
 
 // Listen for language changes and re-render cards
 window.addEventListener('languageChanged', () => {
