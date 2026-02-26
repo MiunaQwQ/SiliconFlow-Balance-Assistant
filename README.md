@@ -209,6 +209,7 @@ SiliconFlow-Balance-Assistant/
 ├── backend/                   # 后端代码 / Backend code
 │   ├── api/                   # API 接口 / API endpoints
 │   │   ├── track_key.php      # 跟踪管理 API / Tracking management
+│   │   ├── bulk_import_keys.php # 批量录入 Key API / Bulk import keys
 │   │   ├── batch_check.php    # 批量查询 API / Batch checking
 │   │   ├── get_history.php    # 历史数据 API / Historical data
 │   │   ├── get_latest_balance.php  # 最新余额 API / Latest balance
@@ -265,7 +266,21 @@ GET /backend/api/track_key.php?action=status&api_key=sk-xxxxx
 GET /backend/api/batch_check.php
 ```
 
-### 3. 获取历史数据 / Get History
+### 3. 后台批量录入 / Admin Bulk Import
+```bash
+POST /backend/api/bulk_import_keys.php
+Content-Type: application/json
+
+{
+  "keys": ["sk-test-1", "sk-test-2"],
+  "save_to_server": true,
+  "track_keys": true,
+  "user_id": "admin-bulk",
+  "user_email": "admin-bulk@local"
+}
+```
+
+### 4. 获取历史数据 / Get History
 ```bash
 GET /backend/api/get_history.php?api_key=sk-xxxxx&days=7
 ```
@@ -275,7 +290,7 @@ GET /backend/api/get_history.php?api_key=sk-xxxxx&days=7
 - `days` (可选): 查询天数 (默认: 7, 最大: 90)
 - `hours` (可选): 查询小时数 (优先于 days 参数)
 
-### 4. 获取最新余额 / Get Latest Balance
+### 5. 获取最新余额 / Get Latest Balance
 ```bash
 GET /backend/api/get_latest_balance.php?api_key=sk-xxxxx
 ```

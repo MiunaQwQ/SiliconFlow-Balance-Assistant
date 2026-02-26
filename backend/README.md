@@ -142,7 +142,56 @@ To optimize API usage while maintaining timely updates, the batch check now uses
 **Auto-Disable Feature**: When balance reaches zero or negative, the tracked key will be automatically disabled (`is_active = 0`) to save system resources.
 ```
 
-### 3. Get History
+### 3. Bulk Import Keys (Admin)
+
+**Endpoint**: `POST /backend/api/bulk_import_keys.php`
+
+This endpoint is intended for admin dashboard bulk key input.
+
+```bash
+curl -X POST http://localhost/backend/api/bulk_import_keys.php \
+  -H "Content-Type: application/json" \
+  -d '{
+    "keys": ["sk-test-1", "sk-test-2"],
+    "save_to_server": true,
+    "track_keys": true,
+    "user_id": "admin-bulk",
+    "user_email": "admin-bulk@local"
+  }'
+```
+
+Request fields:
+- `keys` (required): string array of API keys
+- `save_to_server` (optional): bool, store keys in server DB (`true` by default)
+- `track_keys` (optional): bool, enable active tracking (`true` by default)
+- `user_id` (optional): default user id for imported keys
+- `user_email` (optional): default user email for imported keys
+
+Response:
+```json
+{
+  "success": true,
+  "message": "Bulk import completed",
+  "data": {
+    "total": 2,
+    "success_count": 2,
+    "failed_count": 0,
+    "save_to_server": true,
+    "track_keys": true,
+    "results": [
+      {
+        "key": "sk-test-********st-1",
+        "success": true,
+        "tracked_key_id": 12,
+        "status": "tracked",
+        "message": "Processed successfully"
+      }
+    ]
+  }
+}
+```
+
+### 4. Get History
 
 **Endpoint**: `GET /backend/api/get_history.php`
 
@@ -182,7 +231,7 @@ Response:
 
 **Note**: History will be displayed even if tracking is currently disabled, as long as historical records exist.
 
-### 4. Get Latest Balance
+### 5. Get Latest Balance
 
 **Endpoint**: `GET /backend/api/get_latest_balance.php`
 
@@ -209,7 +258,7 @@ Response:
 
 **Purpose**: This endpoint retrieves the most recent balance record from the database, used by the frontend for automatic refresh without querying the SiliconFlow API directly.
 
-### 5. Get All Tracked Keys (Admin)
+### 6. Get All Tracked Keys (Admin)
 
 **Endpoint**: `GET /backend/api/get_all_keys.php`
 
@@ -245,7 +294,7 @@ Response:
 
 **Note**: This endpoint is used by the admin dashboard to display all tracked API keys.
 
-### 6. Get History Keys
+### 7. Get History Keys
 
 **Endpoint**: `GET /backend/api/get_history_keys.php`
 
@@ -270,7 +319,7 @@ Response:
 
 **Purpose**: Retrieves API keys that have been queried before (for history display).
 
-### 7. Get Supported Models
+### 8. Get Supported Models
 
 **Endpoint**: `GET /backend/api/get_models.php`
 
@@ -288,7 +337,7 @@ Response:
 }
 ```
 
-### 8. Save Query Record
+### 9. Save Query Record
 
 **Endpoint**: `POST /backend/api/save_query.php`
 
@@ -301,7 +350,7 @@ api_key=sk-xxxxx
 
 **Purpose**: Saves a query record to the database for history tracking.
 
-### 9. Admin Login
+### 10. Admin Login
 
 **Endpoint**: `POST /backend/api/login.php`
 
@@ -321,7 +370,7 @@ Response:
 }
 ```
 
-### 10. Check Authentication
+### 11. Check Authentication
 
 **Endpoint**: `GET /backend/api/check_auth.php`
 
@@ -402,6 +451,7 @@ curl -X POST http://localhost/backend/api/track_key.php?action=add \
 backend/
 ├── api/
 │   ├── track_key.php          # Tracking management
+│   ├── bulk_import_keys.php   # Bulk import keys (admin)
 │   ├── batch_check.php        # Scheduled batch checking (with auto-disable)
 │   ├── get_history.php        # Historical data retrieval
 │   ├── get_latest_balance.php # Latest balance from DB
