@@ -162,6 +162,7 @@ curl -X POST http://localhost/backend/api/bulk_import_keys.php \
 
 Request fields:
 - `keys` (required): string array of API keys
+- `duplicate_in_input_count` (optional): count of duplicates found in current input and skipped by frontend
 - `save_to_server` (optional): bool, store keys in server DB (`true` by default)
 - `track_keys` (optional): bool, enable active tracking (`true` by default)
 - `user_id` (optional): default user id for imported keys
@@ -176,6 +177,8 @@ Response:
     "total": 2,
     "success_count": 2,
     "failed_count": 0,
+    "duplicate_in_input_count": 1,
+    "duplicate_in_db_count": 1,
     "save_to_server": true,
     "track_keys": true,
     "results": [
@@ -190,6 +193,10 @@ Response:
   }
 }
 ```
+
+Duplicate handling:
+- `duplicate_in_input_count`: duplicated keys inside one paste/import payload (detected and skipped by frontend).
+- `duplicate_in_db_count`: keys already existing in DB (backend does not re-insert, only conditionally reactivates/updates metadata).
 
 ### 4. Get History
 

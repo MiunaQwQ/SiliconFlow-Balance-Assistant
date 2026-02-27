@@ -280,6 +280,10 @@ Content-Type: application/json
 }
 ```
 
+重复处理规则 / Duplicate handling:
+- 输入重复 (`duplicate_in_input_count`): 同一次输入内重复的 key 会在前端去重并跳过。
+- 数据库重复 (`duplicate_in_db_count`): 后端检测到已存在 key 时不重复插入，仅按条件更新状态并计数。
+
 ### 4. 获取历史数据 / Get History
 ```bash
 GET /backend/api/get_history.php?api_key=sk-xxxxx&days=7
