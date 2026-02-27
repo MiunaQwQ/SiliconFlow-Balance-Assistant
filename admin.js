@@ -47,8 +47,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 function bindBulkImportEvents() {
     const bulkTrackKeys = document.getElementById('bulkTrackKeys');
     const bulkSaveToServer = document.getElementById('bulkSaveToServer');
+    const bulkModal = document.getElementById('bulkImportModal');
 
-    if (!bulkTrackKeys || !bulkSaveToServer) {
+    if (!bulkTrackKeys || !bulkSaveToServer || !bulkModal) {
         return;
     }
 
@@ -66,11 +67,20 @@ function bindBulkImportEvents() {
 
         bulkSaveToServer.disabled = false;
     });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !bulkModal.classList.contains('hidden')) {
+            closeBulkImportModal();
+        }
+    });
 }
 
 function parseBulkKeys(rawInput) {
     if (!rawInput) {
-        return [];
+        return {
+            uniqueKeys: [],
+            duplicateInInputCount: 0
+        };
     }
 
     const segments = rawInput
@@ -78,17 +88,24 @@ function parseBulkKeys(rawInput) {
         .map(item => item.trim())
         .filter(item => item.length > 0);
 
-    const unique = [];
+    const uniqueKeys = [];
     const seen = new Set();
+    let duplicateInInputCount = 0;
 
     segments.forEach((key) => {
         if (!seen.has(key)) {
-            unique.push(key);
+            uniqueKeys.push(key);
             seen.add(key);
+            return;
         }
+
+        duplicateInInputCount += 1;
     });
 
-    return unique;
+    return {
+        uniqueKeys,
+        duplicateInInputCount
+    };
 }
 
 function setBulkImportResult(message, type = '') {
@@ -125,6 +142,34 @@ function clearBulkImportForm() {
     setBulkImportResult('');
 }
 
+function openBulkImportModal() {
+    const bulkModal = document.getElementById('bulkImportModal');
+    const input = document.getElementById('bulkKeysInput');
+    if (!bulkModal) {
+        return;
+    }
+
+    bulkModal.classList.remove('hidden');
+    if (input) {
+        input.focus();
+    }
+}
+
+function closeBulkImportModal() {
+    const bulkModal = document.getElementById('bulkImportModal');
+    if (!bulkModal) {
+        return;
+    }
+
+    bulkModal.classList.add('hidden');
+}
+
+function closeBulkImportModalByOverlay(event) {
+    if (event.target && event.target.id === 'bulkImportModal') {
+        closeBulkImportModal();
+    }
+}
+
 async function handleBulkImport() {
     const input = document.getElementById('bulkKeysInput');
     const importBtn = document.getElementById('bulkImportBtn');
@@ -135,7 +180,10 @@ async function handleBulkImport() {
         return;
     }
 
-    const keys = parseBulkKeys(input.value);
+    const parsed = parseBulkKeys(input.value);
+    const keys = parsed.uniqueKeys;
+    const duplicateInInputCount = parsed.duplicateInInputCount;
+
     if (keys.length === 0) {
         setBulkImportResult(t('bulkImportEmpty') || 'Please input at least one key', 'error');
         return;
@@ -149,6 +197,7 @@ async function handleBulkImport() {
     try {
         const payload = {
             keys,
+            duplicate_in_input_count: duplicateInInputCount,
             save_to_server: bulkSaveToServer.checked,
             track_keys: bulkTrackKeys.checked,
             user_id: BULK_IMPORT_DEFAULT_USER_ID,
@@ -171,10 +220,16 @@ async function handleBulkImport() {
         const summary = result.data || {};
         const successCount = Number(summary.success_count || 0);
         const failedCount = Number(summary.failed_count || 0);
+        const duplicateInDbCount = Number(summary.duplicate_in_db_count || 0);
 
         const successLine = (t('bulkImportSummary') || 'Imported: {0}, Failed: {1}')
             .replace('{0}', successCount)
             .replace('{1}', failedCount);
+        const duplicateInputLine = (t('bulkImportInputDuplicate') || 'Duplicate in input: {0}')
+            .replace('{0}', duplicateInInputCount);
+        const duplicateDbLine = (t('bulkImportDbDuplicate') || 'Duplicate in database: {0}')
+            .replace('{0}', duplicateInDbCount);
+        const summaryText = `${successLine}\n${duplicateInputLine}\n${duplicateDbLine}`;
 
         if (failedCount > 0 && Array.isArray(summary.results)) {
             const failedMessages = summary.results
@@ -183,9 +238,9 @@ async function handleBulkImport() {
                 .map(item => `${item.key}: ${item.message || 'failed'}`);
 
             const failPrefix = t('bulkImportFailedItems') || 'Failed items:';
-            setBulkImportResult(`${successLine}\n${failPrefix}\n${failedMessages.join('\n')}`, 'error');
+            setBulkImportResult(`${summaryText}\n${failPrefix}\n${failedMessages.join('\n')}`, 'error');
         } else {
-            setBulkImportResult(successLine, 'success');
+            setBulkImportResult(summaryText, 'success');
         }
 
         await loadAllKeys();
@@ -1133,27 +1188,7 @@ function selectSortOption(value) {
     renderAllKeys();
 }
 
-/**
- * Update sort criteria (kept for compatibility, now uses custom select)
- */
 function updateSort() {
-    // This function is now handled by selectSortOption
-    // Keeping it for backward compatibility
-}
-
-/**
- * Update sort criteria
- */
-function updateSort() {
-    const sortSelect = document.getElementById('sortSelect');
-    currentSortBy = sortSelect.value;
-
-    // Save preference
-    localStorage.setItem('sf_admin_sort_by', currentSortBy);
-
-    // Re-sort and render
-    sortKeysData();
-    renderAllKeys();
 }
 
 /**

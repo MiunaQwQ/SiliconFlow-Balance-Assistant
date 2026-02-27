@@ -24,6 +24,10 @@ try {
 
     $saveToServer = parseBooleanValue($payload['save_to_server'] ?? true);
     $trackKeys = parseBooleanValue($payload['track_keys'] ?? true);
+    $duplicateInInputCount = intval($payload['duplicate_in_input_count'] ?? 0);
+    if ($duplicateInInputCount < 0) {
+        $duplicateInInputCount = 0;
+    }
 
     if (!$saveToServer && !$trackKeys) {
         Response::error('At least one of save_to_server or track_keys must be true', 400);
@@ -40,6 +44,7 @@ try {
     $results = [];
     $successCount = 0;
     $failedCount = 0;
+    $duplicateInDbCount = 0;
 
     foreach ($keys as $rawKey) {
         if (!is_string($rawKey)) {
@@ -81,6 +86,7 @@ try {
             );
 
             if ($existing) {
+                $duplicateInDbCount++;
                 $updateFields = [];
                 $updateParams = [];
 
@@ -156,6 +162,8 @@ try {
         'total' => count($keys),
         'success_count' => $successCount,
         'failed_count' => $failedCount,
+        'duplicate_in_input_count' => $duplicateInInputCount,
+        'duplicate_in_db_count' => $duplicateInDbCount,
         'save_to_server' => $saveToServer,
         'track_keys' => $trackKeys,
         'results' => $results

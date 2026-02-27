@@ -135,36 +135,9 @@
             </div>
         </header>
 
-        <section class="bulk-import-panel" id="bulkImportPanel">
-            <div class="bulk-import-header">
-                <h2 data-i18n="bulkImportTitle">Bulk Import API Keys</h2>
-                <p data-i18n="bulkImportHint">One key per line, comma or space separated</p>
-            </div>
-
-            <div class="bulk-import-body">
-                <textarea id="bulkKeysInput" class="bulk-keys-input" data-i18n-placeholder="bulkImportPlaceholder"
-                    placeholder="sk-xxx\nsk-yyy"></textarea>
-
-                <div class="bulk-options-row">
-                    <label class="bulk-option-item" for="bulkSaveToServer">
-                        <input type="checkbox" id="bulkSaveToServer" checked>
-                        <span data-i18n="bulkSaveToServer">Save to server</span>
-                    </label>
-                    <label class="bulk-option-item" for="bulkTrackKeys">
-                        <input type="checkbox" id="bulkTrackKeys" checked>
-                        <span data-i18n="bulkTrackKeys">Track keys</span>
-                    </label>
-                </div>
-
-                <div class="bulk-actions-row">
-                    <button id="bulkImportBtn" type="button" class="bulk-action-btn primary" onclick="handleBulkImport()"
-                        data-i18n="bulkImportBtn">Import</button>
-                    <button id="bulkClearBtn" type="button" class="bulk-action-btn" onclick="clearBulkImportForm()"
-                        data-i18n="bulkClearBtn">Clear</button>
-                </div>
-
-                <div class="bulk-result" id="bulkImportResult"></div>
-            </div>
+        <section class="bulk-import-entry" id="bulkImportEntry">
+            <button id="openBulkImportBtn" type="button" class="bulk-entry-btn" onclick="openBulkImportModal()"
+                data-i18n="bulkImportOpenBtn">Bulk Import Keys</button>
         </section>
 
         <!-- Loading State -->
@@ -238,6 +211,42 @@
         <!-- Cards Grid -->
         <div id="cardsGrid" class="cards-grid hidden">
             <!-- Cards will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <div id="bulkImportModal" class="bulk-modal-overlay hidden" onclick="closeBulkImportModalByOverlay(event)">
+        <div class="bulk-modal" role="dialog" aria-modal="true" aria-labelledby="bulkModalTitle">
+            <div class="bulk-import-header">
+                <h2 id="bulkModalTitle" data-i18n="bulkImportTitle">Bulk Import API Keys</h2>
+                <p data-i18n="bulkImportHint">One key per line, comma or space separated</p>
+            </div>
+
+            <div class="bulk-import-body">
+                <textarea id="bulkKeysInput" class="bulk-keys-input" data-i18n-placeholder="bulkImportPlaceholder"
+                    placeholder="sk-xxx\nsk-yyy"></textarea>
+
+                <div class="bulk-options-row">
+                    <label class="bulk-option-item" for="bulkSaveToServer">
+                        <input type="checkbox" id="bulkSaveToServer" checked>
+                        <span data-i18n="bulkSaveToServer">Save to server</span>
+                    </label>
+                    <label class="bulk-option-item" for="bulkTrackKeys">
+                        <input type="checkbox" id="bulkTrackKeys" checked>
+                        <span data-i18n="bulkTrackKeys">Track keys</span>
+                    </label>
+                </div>
+
+                <div class="bulk-actions-row">
+                    <button id="bulkImportBtn" type="button" class="bulk-action-btn primary" onclick="handleBulkImport()"
+                        data-i18n="bulkImportBtn">Import</button>
+                    <button id="bulkClearBtn" type="button" class="bulk-action-btn" onclick="clearBulkImportForm()"
+                        data-i18n="bulkClearBtn">Clear</button>
+                    <button id="bulkCloseBtn" type="button" class="bulk-action-btn" onclick="closeBulkImportModal()"
+                        data-i18n="bulkCloseBtn">Close</button>
+                </div>
+
+                <div class="bulk-result" id="bulkImportResult"></div>
+            </div>
         </div>
     </div>
 
